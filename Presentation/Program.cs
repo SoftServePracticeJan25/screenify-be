@@ -1,5 +1,5 @@
-//testik
-namespace screenify_be
+
+namespace Presentation
 {
     public class Program
     {
