@@ -19,6 +19,12 @@ namespace Presentation.Controllers
         public async Task<IActionResult> GetAll()
         {
             var movies = await _movieRepository.GetAllAsync();
+
+            if (movies == null)
+            {
+                return NotFound("tut pusto :(");
+            }
+
             return Ok(movies);
         }
 
