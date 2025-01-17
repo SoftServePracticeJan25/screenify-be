@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories
             return await _context.Set<Movie>().ToListAsync();
         }
 
-        public async Task<Movie> GetByIdAsync(int id)
+        public async Task<Movie?> GetByIdAsync(int id)
         {
             return await _context.Set<Movie>().FindAsync(id);
         }

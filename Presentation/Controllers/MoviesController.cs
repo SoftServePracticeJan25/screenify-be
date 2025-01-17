@@ -26,8 +26,6 @@ namespace Presentation.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var movie = await _movieRepository.GetByIdAsync(id);
-            if (movie == null)
-                return NotFound();
             return Ok(movie);
         }
 
