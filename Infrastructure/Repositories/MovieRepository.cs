@@ -1,5 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,9 +12,9 @@ namespace Infrastructure.Repositories
 {
     public class MovieRepository : IMovieRepository
     {
-        private readonly DbContext _context;
+        private readonly MovieDbContext _context;
 
-        public MovieRepository(DbContext context)
+        public MovieRepository(MovieDbContext context)
         {
             _context = context;
         }
@@ -48,11 +49,6 @@ namespace Infrastructure.Repositories
                 _context.Set<Movie>().Remove(movie);
                 await _context.SaveChangesAsync();
             }
-        }
-
-        Task<List<Movie>> IMovieRepository.GetAllAsync()
-        {
-            throw new NotImplementedException();
         }
 
     }

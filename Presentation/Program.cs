@@ -1,4 +1,6 @@
+using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Presentation
@@ -14,6 +16,8 @@ namespace Presentation
 
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
 
             builder.Services.AddControllers();
 
