@@ -11,9 +11,8 @@ namespace Presentation
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+            var connectionString = builder.Configuration["ConnectionString"];
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
