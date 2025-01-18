@@ -13,7 +13,6 @@ namespace Presentation
 
 
             var connectionString = builder.Configuration["ConnectionString"];
-            Console.WriteLine($"Connection String: {connectionString}");
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
