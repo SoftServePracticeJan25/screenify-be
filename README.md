@@ -1,10 +1,14 @@
 # screenify-be
 
-to run this program you need to add `.env` file in your application with following variables:
+to run this program you need to setup `secrets.json` file in your `Presentation` project with following commands:
 
-```env
-SERVER_IP=your_server_ip
-PORT=your_port
-DB_NAME=your_db_name
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
+```bash
+cd Presentation
+dotnet user-secrets init
+dotnet user-secrets set "ConnectionString" "(your_db_connection_string)"
+
+
+```secrets.json
+ConnectionString=(your_db_connection_string)
+```
+

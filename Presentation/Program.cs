@@ -10,16 +10,10 @@ namespace Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            DotNetEnv.Env.Load(path: "../.env");
-            var serverIp = Environment.GetEnvironmentVariable("SERVER_IP");
-            var port = Environment.GetEnvironmentVariable("PORT");
-            var dbName = Environment.GetEnvironmentVariable("DB_NAME");
-            var dbUser = Environment.GetEnvironmentVariable("DB_USER");
-            var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
-            var connectionString = $"Server={serverIp};Port={port};Database={dbName};User={dbUser};Password={dbPassword};";
 
+
+            var connectionString = builder.Configuration["ConnectionString"];
             Console.WriteLine($"Connection String: {connectionString}");
-
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
