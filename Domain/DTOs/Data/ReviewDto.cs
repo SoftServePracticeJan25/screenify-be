@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Domain.DTOs.Data
 {
-    public class Review
+    public class ReviewDto
     {
         public int Rating { get; set; }
         public string? Comment { get; set; } = string.Empty;
