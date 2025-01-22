@@ -16,7 +16,7 @@ namespace Domain.Entities
 
         public int? MovieId { get; set; }
         public Movie? Movie { get; set; }
-        public int? UserId { get; set; }
-        //public User? User { get; set; } first solve Identity problem
+        public string? AppUserId { get; set; } // must be string type
+        public AppUser? AppUser { get; set; }
     }
 }

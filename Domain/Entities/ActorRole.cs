@@ -10,5 +10,7 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
         public string? RoleName { get; set; } = string.Empty;
+
+        public List<MovieActor> MovieActors { get; set; } = new List<MovieActor>();
     }
 }
