@@ -9,46 +9,40 @@ namespace Presentation.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController(
+        UserManager<AppUser> userManager,
+        ITokenService tokenService,
+        SignInManager<AppUser> signInManager)
+        : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ITokenService _tokenService;
-        private readonly SignInManager<AppUser> _signInManager;
-        public AccountController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager)
-        {
-            _userManager = userManager;
-            _tokenService = tokenService;
-            _signInManager = signInManager;
-        }
-
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.Username);
+            var user = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.Username);
 
             if (user == null) return Unauthorized("Invalid username!");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (!result.Succeeded) return Unauthorized("Username not found and/or password incorrect :(");
 
 
-            var refreshToken = _tokenService.CreateRefreshToken();
+            var refreshToken = tokenService.CreateRefreshToken();
 
             user.RefreshToken = refreshToken;
 
             user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
 
-            await _userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user);
 
             return Ok(new
             {
-                UserName = user.UserName,
-                Email = user.Email,
-                AccessToken = _tokenService.CreateAccessToken(user),
+                user.UserName,
+                user.Email,
+                AccessToken = tokenService.CreateAccessToken(user),
                 RefreshToken = refreshToken
             });
         }
@@ -65,19 +59,18 @@ namespace Presentation.Controllers
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
+                    RefreshToken = tokenService.CreateRefreshToken(),
+                    RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30),
+                    Reviews = [],
+                    Transactions = []
                 };
+                
 
-                var refreshToken = _tokenService.CreateRefreshToken();
-
-                appUser.RefreshToken = refreshToken;
-
-                appUser.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
-
-                var createdUser = await _userManager.CreateAsync(appUser, registerDto.Password);
+                var createdUser = await userManager.CreateAsync(appUser, registerDto.Password);
 
                 if (createdUser.Succeeded)
                 {
-                    var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
+                    var roleResult = await userManager.AddToRoleAsync(appUser, "User");
                     if (roleResult.Succeeded)
                     {
                         return Ok(
@@ -85,19 +78,15 @@ namespace Presentation.Controllers
                             {
                                 UserName = appUser.UserName,
                                 Email = appUser.Email,
-                                AccessToken = _tokenService.CreateAccessToken(appUser),
+                                AccessToken = tokenService.CreateAccessToken(appUser),
                                 RefreshToken = appUser.RefreshToken
                             });
                     }
-                    else
-                    {
-                        return StatusCode(500, roleResult.Errors);
-                    }   
+
+                    return StatusCode(500, roleResult.Errors);
                 }
-                else
-                {
-                    return StatusCode(500, createdUser.Errors);
-                }
+
+                return StatusCode(500, createdUser.Errors);
             }
             catch (Exception e)
             {
@@ -108,18 +97,18 @@ namespace Presentation.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
         {
-            var user = await _userManager.Users
+            var user = await userManager.Users
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenDto.RefreshToken && u.RefreshTokenExpiryDate > DateTime.UtcNow);
 
             if (user == null) return Unauthorized("Invalid or expired refresh token");
 
-            var newAccessToken = _tokenService.CreateAccessToken(user);
-            var newRefreshToken = _tokenService.CreateRefreshToken();
+            var newAccessToken = tokenService.CreateAccessToken(user);
+            var newRefreshToken = tokenService.CreateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
 
-            await _userManager.UpdateAsync(user);
+            await userManager.UpdateAsync(user);
 
             return Ok(new
             {

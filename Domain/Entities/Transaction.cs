@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Domain.Entities
 {
@@ -16,6 +13,6 @@ namespace Domain.Entities
         public string? AppUserId { get; set; } // must be string type
         public AppUser? AppUser { get; set; }
 
-        public List<Ticket> Tickets { get; set; } = new List<Ticket>();
+        public List<Ticket> Tickets { get; set; } = [];
     }
 }

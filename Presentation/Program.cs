@@ -11,11 +11,11 @@ using Microsoft.OpenApi.Models;
 
 namespace Presentation
 {
-    public class Program
+     internal abstract class Program
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddSwaggerGen(option =>
             {
@@ -77,7 +77,7 @@ namespace Presentation
                     ValidAudience = builder.Configuration["JWT:Audience"],
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]))
+                        System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
                 };
             });
 

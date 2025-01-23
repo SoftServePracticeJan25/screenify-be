@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.DTOs.Data
+﻿namespace Domain.DTOs.Data
 {
-    public class ActorRoleDto // do we really need this?
+    public class ActorRoleDto
     {
-        public string? RoleName { get; set; } = string.Empty;
+        public required string RoleName { get; init; }
     }
 }
