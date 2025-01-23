@@ -21,7 +21,7 @@ namespace Infrastructure.Services
             _config = config;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
         }
-        public string CreateToken(AppUser user)
+        public string CreateAccessToken(AppUser user)
         {
             var claims = new List<Claim>
             {
@@ -45,6 +45,11 @@ namespace Infrastructure.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        public string CreateRefreshToken()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }

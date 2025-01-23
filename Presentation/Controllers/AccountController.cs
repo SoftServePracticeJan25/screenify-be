@@ -35,13 +35,22 @@ namespace Presentation.Controllers
 
             if (!result.Succeeded) return Unauthorized("Username not found and/or password incorrect :(");
 
-            return Ok(
-                new NewUserDto
-                {
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    Token = _tokenService.CreateToken(user)
-                });
+
+            var refreshToken = _tokenService.CreateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+
+            user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                AccessToken = _tokenService.CreateAccessToken(user),
+                RefreshToken = refreshToken
+            });
         }
 
         [HttpPost("register")]
@@ -58,6 +67,12 @@ namespace Presentation.Controllers
                     Email = registerDto.Email,
                 };
 
+                var refreshToken = _tokenService.CreateRefreshToken();
+
+                appUser.RefreshToken = refreshToken;
+
+                appUser.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
+
                 var createdUser = await _userManager.CreateAsync(appUser, registerDto.Password);
 
                 if (createdUser.Succeeded)
@@ -70,7 +85,8 @@ namespace Presentation.Controllers
                             {
                                 UserName = appUser.UserName,
                                 Email = appUser.Email,
-                                Token = _tokenService.CreateToken(appUser)
+                                AccessToken = _tokenService.CreateAccessToken(appUser),
+                                RefreshToken = appUser.RefreshToken
                             });
                     }
                     else
@@ -88,5 +104,29 @@ namespace Presentation.Controllers
                 return StatusCode(500, e);
             }
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
+        {
+            var user = await _userManager.Users
+                .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenDto.RefreshToken && u.RefreshTokenExpiryDate > DateTime.UtcNow);
+
+            if (user == null) return Unauthorized("Invalid or expired refresh token");
+
+            var newAccessToken = _tokenService.CreateAccessToken(user);
+            var newRefreshToken = _tokenService.CreateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
+
+            await _userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            });
+        }
+
     }
 }
