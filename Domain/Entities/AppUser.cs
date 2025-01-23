@@ -10,6 +10,6 @@ namespace Domain.Entities
     public class AppUser : IdentityUser
     {
         public List<Review> Reviews { get; set; } = new List<Review>();
-        public List<Ticket> Tickets { get; set; } = new List<Ticket>();
+        public List<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 }

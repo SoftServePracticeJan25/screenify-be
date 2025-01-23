@@ -11,7 +11,7 @@ namespace Domain.DTOs.Data
     {
         public int SeatNum { get; set; }
 
-        public string? AppUserId { get; set; } // must be string type
+        public int TransactionId { get; set; }
         public int? SessionId { get; set; }
     }
 }

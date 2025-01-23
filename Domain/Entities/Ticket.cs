@@ -11,8 +11,8 @@ namespace Domain.Entities
         public int Id { get; set; }
         public int SeatNum { get; set; }
 
-        public string? AppUserId { get; set; } // must be string type
-        public AppUser? AppUser { get; set; }
+        public int TransactionId { get; set; }
+        public Transaction Transaction { get; set; }
 
         public int? SessionId { get; set; }
         public Session? Session { get; set; }

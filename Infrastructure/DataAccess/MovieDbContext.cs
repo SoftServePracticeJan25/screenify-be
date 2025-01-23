@@ -48,9 +48,9 @@ public class MovieDbContext: IdentityDbContext<AppUser>
             .WithMany(r => r.Reviews)
             .HasForeignKey(p => p.AppUserId);
 
-        modelBuilder.Entity<Ticket>()
+        modelBuilder.Entity<Transaction>()
             .HasOne(u => u.AppUser)
-            .WithMany(t => t.Tickets)
+            .WithMany(t => t.Transactions)
             .HasForeignKey(p => p.AppUserId);
 
         // Composite Key

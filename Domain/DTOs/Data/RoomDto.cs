@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Domain.DTOs.Data
 {
-    public class RoomDto // do we really need this?
+    public class RoomDto
     {
+        public string Name { get; set; }
+        public int SeatsAmount { get; set; }
         public int? CinemaTypeId { get; set; }
     }
 }
