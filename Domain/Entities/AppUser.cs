@@ -1,18 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities
 {
     public class AppUser : IdentityUser
     {
-        public string RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryDate { get; set; }
+        [MaxLength(50)] public required string RefreshToken { get; set; }
+        public required DateTime RefreshTokenExpiryDate { get; set; }
 
-        public List<Review> Reviews { get; set; } = new List<Review>();
-        public List<Transaction> Transactions { get; set; } = new List<Transaction>();
+        public required List<Review> Reviews { get; init; }
+        public required List<Transaction> Transactions { get; init; }
     }
 }

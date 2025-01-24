@@ -6,41 +6,29 @@ using Microsoft.AspNetCore.Mvc;
 namespace Presentation.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class MoviesController : ControllerBase
+    [Route("api/movie")]
+    public class MoviesController(IMovieRepository movieRepository) : ControllerBase
     {
-        private readonly IMovieRepository _movieRepository;
-
-        public MoviesController(IMovieRepository movieRepository)
-        {
-            _movieRepository = movieRepository;
-        }
-
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var movies = await _movieRepository.GetAllAsync();
-
-            if (movies == null)
-            {
-                return NotFound("tut pusto :(");
-            }
+            var movies = await movieRepository.GetAllAsync();
 
             return Ok(movies);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var movie = await _movieRepository.GetByIdAsync(id);
+            Movie? movie = await movieRepository.GetByIdAsync(id);
             return Ok(movie);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(Movie movie)
         {
-            await _movieRepository.AddAsync(movie);
+            await movieRepository.AddAsync(movie);
             return CreatedAtAction(nameof(GetById), new { id = movie.Id }, movie);
         }
     }

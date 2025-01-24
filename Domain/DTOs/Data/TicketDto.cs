@@ -1,17 +1,12 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Domain.DTOs.Data
 {
     public class TicketDto
     {
-        public int SeatNum { get; set; }
+        public required int SeatNum { get; init; }
 
-        public int TransactionId { get; set; }
-        public int? SessionId { get; set; }
+        public required int TransactionId { get; init; }
+        public required int SessionId { get; init; }
     }
 }
