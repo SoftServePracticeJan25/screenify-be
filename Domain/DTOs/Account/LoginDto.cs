@@ -6,7 +6,6 @@ namespace Domain.DTOs.Account
     {
         [Required]
         public required string Username { get; init; }
-
         [Required]
         public required string Password { get; init; }
     }
