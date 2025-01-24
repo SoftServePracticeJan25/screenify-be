@@ -18,7 +18,7 @@ namespace Presentation.Controllers
             return Ok(movies);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             Movie? movie = await movieRepository.GetByIdAsync(id);
