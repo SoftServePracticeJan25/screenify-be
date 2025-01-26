@@ -17,7 +17,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task GetAllAsync_ReturnsListOfMovies()
+        public async Task GetAllAsyncReturnsListOfMovies()
         {
             var movies = new List<Movie>
             {
@@ -35,7 +35,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task GetByIdAsync_ReturnsMovie_WhenMovieExists()
+        public async Task GetByIdAsyncReturnsMovieWhenMovieExists()
         {
             var movie = new Movie { Id = 1, Title = "Arcane" };
             _mockMovieRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(movie);
@@ -47,7 +47,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task GetByIdAsync_ReturnsNull_WhenMovieDoesNotExist()
+        public async Task GetByIdAsyncReturnsNullWhenMovieDoesNotExist()
         {
             _mockMovieRepo.Setup(repo => repo.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((Movie?)null);
             
@@ -57,7 +57,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task AddAsync_AddsMovie()
+        public async Task AddAsyncAddsMovie()
         {
             var movie = new Movie { Id = 1, Title = "New Movie" };
             
@@ -67,7 +67,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task UpdateAsync_UpdatesMovie()
+        public async Task UpdateAsyncUpdatesMovie()
         {
             var movie = new Movie { Id = 1, Title = "Updated Movie" };
             
@@ -77,7 +77,7 @@ public class MovieRepositoryTests
         }
 
         [Fact]
-        public async Task DeleteAsync_DeletesMovie()
+        public async Task DeleteAsyncDeletesMovie()
         {
             var movieId = 1;
             

@@ -22,7 +22,7 @@ public class MoviesControllerTests
         }
 
         [Fact]
-        public async Task GetAll_ReturnsOkResult_WithMovies()
+        public async Task GetAllReturnsOkResultWithMovies()
         {
             var movies = new List<Movie>
             {
@@ -40,7 +40,7 @@ public class MoviesControllerTests
         }
 
         [Fact]
-        public async Task GetById_ReturnsOkResult_WithMovie()
+        public async Task GetByIdReturnsOkResultWithMovie()
         {
             var movie = new Movie { Id = 1, Title = "Arcane" };
             _mockMovieRepository.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(movie);
@@ -53,7 +53,7 @@ public class MoviesControllerTests
         }
 
         [Fact]
-        public async Task Create_ReturnsCreatedAtActionResult_WithMovie()
+        public async Task CreateReturnsCreatedAtActionResultWithMovie()
         {
             var movie = new Movie { Id = 1, Title = "Arcane" };
             _mockMovieRepository.Setup(repo => repo.AddAsync(movie)).Returns(Task.CompletedTask); 
