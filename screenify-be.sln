@@ -14,9 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "screenify-be-dev-MovieRepository-test", "screenify-be-dev-MovieRepository-test\screenify-be-dev-MovieRepository-test.csproj", "{DDF14E6E-AD9A-4202-8EAF-C7AB8DC6E6B5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "screenify-be-dev-Controllers-test", "screenify-be-dev-Controllers-test\screenify-be-dev-Controllers-test.csproj", "{C0865150-82D7-4EC9-B450-A42DBE01EC91}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "screenify-be-dev-tests", "screenify-be-dev-tests\screenify-be-dev-tests.csproj", "{C0865150-82D7-4EC9-B450-A42DBE01EC91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,10 +34,6 @@ Global
 		{D3BF87FA-40DE-4CF2-B258-DD04EB3C5AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3BF87FA-40DE-4CF2-B258-DD04EB3C5AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3BF87FA-40DE-4CF2-B258-DD04EB3C5AE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DDF14E6E-AD9A-4202-8EAF-C7AB8DC6E6B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDF14E6E-AD9A-4202-8EAF-C7AB8DC6E6B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DDF14E6E-AD9A-4202-8EAF-C7AB8DC6E6B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DDF14E6E-AD9A-4202-8EAF-C7AB8DC6E6B5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C0865150-82D7-4EC9-B450-A42DBE01EC91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C0865150-82D7-4EC9-B450-A42DBE01EC91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0865150-82D7-4EC9-B450-A42DBE01EC91}.Release|Any CPU.ActiveCfg = Release|Any CPU
