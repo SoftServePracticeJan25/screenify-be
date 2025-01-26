@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services;
+using Infrastructure.MappingProfiles;
 
 namespace Presentation
 {
@@ -83,8 +85,11 @@ namespace Presentation
 
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IActorService, ActorService>();
 
             builder.Services.AddControllers();
+
+            builder.Services.AddAutoMapper(typeof(MapProfile));
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

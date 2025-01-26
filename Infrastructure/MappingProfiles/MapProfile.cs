@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.DTOs.Data;
+using Domain.DTOs.Data.ActorDtos;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,16 +15,19 @@ namespace Infrastructure.MappingProfiles
         public MapProfile()
         {
             CreateMap<Actor, ActorDto>();
+            CreateMap<Actor, ActorUpdateDto>();
+            CreateMap<Actor, ActorCreateDto>();
+
             CreateMap<ActorRole, ActorRoleDto>();
             CreateMap<CinemaType, CinemaTypeDto>();
             CreateMap<Genre, GenreDto>();
-            CreateMap<MovieActor, ActorDto>();
-            CreateMap<Movie, ActorDto>();
-            CreateMap<MovieGenre, ActorDto>();
-            CreateMap<Review, ActorDto>();
-            CreateMap<Room, ActorDto>();
-            CreateMap<Session, ActorDto>();
-            CreateMap<Ticket, ActorDto>();
+            CreateMap<MovieActor, MovieActorDto>();
+            CreateMap<Movie, MovieDto>();
+            CreateMap<MovieGenre, MovieGenreDto>();
+            CreateMap<Review, ReviewDto>();
+            CreateMap<Room, RoomDto>();
+            CreateMap<Session, SessionDto>();
+            CreateMap<Ticket, TicketDto>();
         }
     }
 }
