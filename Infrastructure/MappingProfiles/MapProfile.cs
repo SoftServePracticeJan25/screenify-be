@@ -9,19 +9,30 @@ namespace Infrastructure.MappingProfiles
     {
         public MapProfile()
         {
-            CreateMap<Actor, ActorDto>();        
-            CreateMap<ActorRole, ActorRoleDto>();           
-            CreateMap<CinemaType, CinemaTypeDto>();          
-            CreateMap<Genre, GenreDto>();
-           
+            //  Actor -> ActorDto
+            CreateMap<Actor, ActorDto>();
+
+            //  ActorRole -> ActorRoleDto
+            CreateMap<ActorRole, ActorRoleDto>();
+
+            //  CinemaType -> CinemaTypeDto
+            CreateMap<CinemaType, CinemaTypeDto>();
+
+            //  Genre <-> GenreDto
+            CreateMap<Genre, GenreDto>().ReverseMap();
+
+            //  MovieActor -> ActorDto
             CreateMap<MovieActor, ActorDto>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Actor.Name))
                 .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Actor.Bio))
                 .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.Actor.BirthDate))
                 .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.Actor.PhotoUrl))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.ActorRole));
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => new ActorRoleDto
+                {
+                    RoleName = src.ActorRole.RoleName
+                }));
 
-            
+            // MovieCreateDto -> Movie
             CreateMap<MovieCreateDto, Movie>()
                 .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom(src =>
                     src.GenreIds.Select(genreId => new MovieGenre { GenreId = genreId })))
@@ -32,7 +43,7 @@ namespace Infrastructure.MappingProfiles
                         ActorRoleId = actor.RoleId
                     })));
 
-            
+            //  Movie -> MovieReadDto
             CreateMap<Movie, MovieReadDto>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
                     src.MovieGenres.Select(mg => new GenreDto
@@ -53,14 +64,15 @@ namespace Infrastructure.MappingProfiles
                         }
                     })));
 
-            
-            CreateMap<Session, SessionDto>();
-
-            CreateMap<SessionDto, Session>()
+            // Session <-> SessionDto
+            CreateMap<Session, SessionDto>().ReverseMap()
                 .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id
                 .ForMember(dest => dest.Movie, opt => opt.Ignore()) // Ignore Navigation
                 .ForMember(dest => dest.Room, opt => opt.Ignore())
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore());
+
+            CreateMap<GenreCreateDto, Genre>(); 
+            CreateMap<Genre, GenreDto>().ReverseMap();
         }
     }
 }
