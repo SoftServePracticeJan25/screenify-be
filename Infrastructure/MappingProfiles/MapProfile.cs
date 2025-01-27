@@ -16,7 +16,7 @@ namespace Infrastructure.MappingProfiles
         {
             CreateMap<Actor, ActorDto>();
             CreateMap<Actor, ActorUpdateDto>();
-            CreateMap<Actor, ActorCreateDto>();
+            CreateMap<Actor, ActorCreateDto>().ReverseMap();
 
             CreateMap<ActorRole, ActorRoleDto>();
             CreateMap<CinemaType, CinemaTypeDto>();

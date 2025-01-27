@@ -29,7 +29,7 @@ namespace Services
         {
             var actorModel = await _context.Actors.FirstOrDefaultAsync(x => x.Id == id);
 
-            if (actorModel != null)
+            if (actorModel == null)
             {
                 return null;
             }
