@@ -87,6 +87,7 @@ namespace Presentation
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IActorService, ActorService>();
+            builder.Services.AddScoped<IActorRoleService, ActorRoleService>();
 
             builder.Services.AddControllers();
 
