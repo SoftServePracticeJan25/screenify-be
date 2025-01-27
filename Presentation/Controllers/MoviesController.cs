@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.DTOs.Api;
+using Domain.DTOs.Data;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,39 +10,78 @@ namespace Presentation.Controllers
     [Route("api/[controller]")]
     public class MoviesController : ControllerBase
     {
-        private readonly IMovieRepository _movieRepository;
+        private readonly IMovieService _movieService;
 
-        public MoviesController(IMovieRepository movieRepository)
+        public MoviesController(IMovieService movieService)
         {
-            _movieRepository = movieRepository;
+            _movieService = movieService;
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetAll()
         {
-            var movies = await _movieRepository.GetAllAsync();
-
-            if (movies == null)
-            {
-                return NotFound("tut pusto :(");
-            }
-
-            return Ok(movies);
+            var movies = await _movieService.GetAllAsync();
+            return Ok(movies); // MovieReadDto
         }
 
+        
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
-            var movie = await _movieRepository.GetByIdAsync(id);
-            return Ok(movie);
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(movie); 
         }
 
+        
         [HttpPost]
-        public async Task<IActionResult> Create(Movie movie)
+        public async Task<IActionResult> Add([FromBody] MovieCreateDto movieCreateDto)
         {
-            await _movieRepository.AddAsync(movie);
-            return CreatedAtAction(nameof(GetById), new { id = movie.Id }, movie);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _movieService.AddAsync(movieCreateDto);
+            return CreatedAtAction(nameof(GetById), new { id = movieCreateDto.Title }, movieCreateDto);
+        }
+
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] MovieCreateDto movieCreateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            await _movieService.UpdateAsync(id, movieCreateDto);
+            return NoContent();
+        }
+
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            await _movieService.DeleteAsync(id);
+            return NoContent();
         }
     }
 }

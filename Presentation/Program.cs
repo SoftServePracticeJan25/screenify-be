@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Infrastructure.MappingProfiles;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -80,9 +81,11 @@ namespace Presentation
                         System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]))
                 };
             });
-
-            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddAutoMapper(typeof(MapProfile));
+            builder.Services.AddScoped<IMovieService, MovieService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
 
             builder.Services.AddControllers();
 

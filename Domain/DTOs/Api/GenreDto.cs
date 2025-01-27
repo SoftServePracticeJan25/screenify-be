@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs.Data
+namespace Domain.DTOs.Api
 {
-    public class ActorRoleDto // do we really need this?
+    public class GenreDto
     {
-        public string? RoleName { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }
