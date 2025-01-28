@@ -96,6 +96,7 @@ namespace Presentation
             builder.Services.AddScoped<IActorService, ActorService>();
             builder.Services.AddScoped<IActorRoleService, ActorRoleService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IMovieActorService, MovieActorService>();
 
             builder.Services.AddControllers();
 

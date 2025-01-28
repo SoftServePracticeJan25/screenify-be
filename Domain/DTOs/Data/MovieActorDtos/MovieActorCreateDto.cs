@@ -1,7 +1,11 @@
-﻿
-namespace Domain.DTOs.Data
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Domain.DTOs.Data.MovieActorDtos
 {
-    public class MovieActorDto
+    public class MovieActorCreateDto
     {
         public required int MovieId { get; init; }
         public required int ActorId { get; init; }

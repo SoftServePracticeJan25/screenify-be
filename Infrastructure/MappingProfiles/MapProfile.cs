@@ -3,6 +3,7 @@ using Domain.DTOs.Data;
 using Domain.DTOs.Data.ActorDtos;
 using Domain.DTOs.Data.ActorRoleDtos;
 using Domain.DTOs.Data.ReviewDtos;
+using Domain.DTOs.Data.MovieActorDtos;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,11 @@ namespace Infrastructure.MappingProfiles
 
             CreateMap<CinemaType, CinemaTypeDto>();
             CreateMap<Genre, GenreDto>();
-            CreateMap<MovieActor, MovieActorDto>();
+
+            CreateMap<MovieActor, MovieActorDto>().ReverseMap();
+            CreateMap<MovieActor, MovieActorCreateDto>().ReverseMap();
+            CreateMap<MovieActor, MovieActorUpdateDto>().ReverseMap();
+
             CreateMap<Movie, MovieDto>();
             CreateMap<MovieGenre, MovieGenreDto>();
 
