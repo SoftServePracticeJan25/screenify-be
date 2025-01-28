@@ -4,6 +4,7 @@ using Domain.DTOs.Data.ActorDtos;
 using Domain.DTOs.Data.ActorRoleDtos;
 using Domain.DTOs.Data.ReviewDtos;
 using Domain.DTOs.Data.MovieActorDtos;
+using Domain.DTOs.Data.Transactiondtos;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,10 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();
             CreateMap<Review, ReviewViewDto>().ReverseMap();
+
+            CreateMap<Transaction, TransactionDto>().ReverseMap();
+            CreateMap<Transaction, TransactionCreateDto>().ReverseMap();
+            CreateMap<Transaction, TransactionUpdateDto>().ReverseMap();
 
             CreateMap<Room, RoomDto>();
             CreateMap<Session, SessionDto>();
