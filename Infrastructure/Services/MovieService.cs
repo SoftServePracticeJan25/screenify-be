@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Domain.DTOs;
 using Domain.DTOs.Api;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -20,21 +18,17 @@ namespace Infrastructure.Services
             _mapper = mapper;
         }
 
-        // Получение всех фильмов
         public async Task<IEnumerable<MovieReadDto>> GetAllAsync()
         {
-            return await _context.Movies
-                .Include(m => m.MovieGenres)
-                    .ThenInclude(mg => mg.Genre)
-                .Include(m => m.MovieActors)
-                    .ThenInclude(ma => ma.Actor)
-                .Include(m => m.MovieActors)
-                    .ThenInclude(ma => ma.ActorRole)
-                .ProjectTo<MovieReadDto>(_mapper.ConfigurationProvider) // Маппинг на ReadDto
+            var movies = await _context.Movies
+                .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+                .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
+                .Include(m => m.MovieActors).ThenInclude(ma => ma.ActorRole)
                 .ToListAsync();
+
+            return _mapper.Map<IEnumerable<MovieReadDto>>(movies);
         }
 
-        // Получение фильма по ID
         public async Task<MovieReadDto?> GetByIdAsync(int id)
         {
             var movie = await _context.Movies
@@ -46,18 +40,33 @@ namespace Infrastructure.Services
                     .ThenInclude(ma => ma.ActorRole)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            return _mapper.Map<MovieReadDto>(movie); // Маппинг на ReadDto
+            if (movie == null)
+                throw new KeyNotFoundException($"Movie with ID {id} not found.");
+
+            return _mapper.Map<MovieReadDto>(movie);
         }
 
-        // Добавление нового фильма
-        public async Task AddAsync(MovieCreateDto movieCreateDto)
+        public async Task<MovieReadDto> AddAsync(MovieCreateDto movieCreateDto)
         {
-            var movie = _mapper.Map<Movie>(movieCreateDto); // Маппинг на сущность
+            var movie = _mapper.Map<Movie>(movieCreateDto);
+
+            var genres = await _context.Genres
+                .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
+                .ToListAsync();
+            movie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+
             _context.Movies.Add(movie);
             await _context.SaveChangesAsync();
+
+            var savedMovie = await _context.Movies
+                .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+                .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
+                .Include(m => m.MovieActors).ThenInclude(ma => ma.ActorRole)
+                .FirstOrDefaultAsync(m => m.Id == movie.Id);
+
+            return _mapper.Map<MovieReadDto>(savedMovie);
         }
 
-        // Обновление фильма
         public async Task UpdateAsync(int id, MovieCreateDto movieCreateDto)
         {
             var existingMovie = await _context.Movies
@@ -68,21 +77,38 @@ namespace Infrastructure.Services
             if (existingMovie == null)
                 throw new KeyNotFoundException($"Movie with ID {id} not found.");
 
-            // Применяем изменения из DTO
             _mapper.Map(movieCreateDto, existingMovie);
+
+            _context.MovieGenres.RemoveRange(existingMovie.MovieGenres);
+            var genres = await _context.Genres
+                .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
+                .ToListAsync();
+            existingMovie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+
+            _context.MovieActors.RemoveRange(existingMovie.MovieActors);
+            existingMovie.MovieActors = movieCreateDto.Actors.Select(actor => new MovieActor
+            {
+                ActorId = actor.ActorId,
+                ActorRoleId = actor.RoleId,
+                CharacterName = actor.CharacterName
+            }).ToList();
 
             await _context.SaveChangesAsync();
         }
-
-        // Удаление фильма
-        public async Task DeleteAsync(int id)
+  
+        public async Task<bool> DeleteAsync(int id)
         {
+            var sessions = await _context.Sessions.Where(s => s.MovieId == id).ToListAsync();
+            if (sessions.Any())
+                _context.Sessions.RemoveRange(sessions);
+
             var movie = await _context.Movies.FindAsync(id);
             if (movie == null)
-                throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                return false;
 
             _context.Movies.Remove(movie);
             await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

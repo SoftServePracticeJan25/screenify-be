@@ -9,31 +9,28 @@ namespace Infrastructure.MappingProfiles
     {
         public MapProfile()
         {
-            //  Actor -> ActorDto
             CreateMap<Actor, ActorDto>();
-            CreateMap<Room, RoomReadDto>(); 
+
+            CreateMap<Room, RoomReadDto>();
             CreateMap<RoomCreateDto, Room>();
-            //  ActorRole -> ActorRoleDto
+
             CreateMap<ActorRole, ActorRoleDto>();
 
-            //  CinemaType -> CinemaTypeDto
             CreateMap<CinemaType, CinemaTypeDto>();
 
-            //  Genre <-> GenreDto
             CreateMap<Genre, GenreDto>().ReverseMap();
 
-            //  MovieActor -> ActorDto
-            CreateMap<MovieActor, ActorDto>()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Actor.Name))
-                .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Actor.Bio))
-                .ForMember(dest => dest.BirthDate, opt => opt.MapFrom(src => src.Actor.BirthDate))
-                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.Actor.PhotoUrl))
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => new ActorRoleDto
+            CreateMap<MovieActor, MovieActorDto>()
+                .ForMember(dest => dest.Actor, opt => opt.MapFrom(src => new ActorDto
                 {
-                    RoleName = src.ActorRole.RoleName
-                }));
+                    Name = src.Actor.Name,
+                    Bio = src.Actor.Bio,
+                    BirthDate = src.Actor.BirthDate,
+                    PhotoUrl = src.Actor.PhotoUrl
+                }))
+                .ForMember(dest => dest.CharacterName, opt => opt.MapFrom(src => src.CharacterName))
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.ActorRole.RoleName));
 
-            // MovieCreateDto -> Movie
             CreateMap<MovieCreateDto, Movie>()
                 .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom(src =>
                     src.GenreIds.Select(genreId => new MovieGenre { GenreId = genreId })))
@@ -41,39 +38,40 @@ namespace Infrastructure.MappingProfiles
                     src.Actors.Select(actor => new MovieActor
                     {
                         ActorId = actor.ActorId,
-                        ActorRoleId = actor.RoleId
+                        ActorRoleId = actor.RoleId,
+                        CharacterName = actor.CharacterName
                     })));
 
-            //  Movie -> MovieReadDto
             CreateMap<Movie, MovieReadDto>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                    src.MovieGenres.Select(mg => new GenreDto
-                    {
-                        Id = mg.GenreId,
-                        Name = mg.Genre.Name
-                    })))
-                .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
-                    src.MovieActors.Select(ma => new ActorDto
-                    {
-                        Name = ma.Actor.Name,
-                        Bio = ma.Actor.Bio,
-                        BirthDate = ma.Actor.BirthDate,
-                        PhotoUrl = ma.Actor.PhotoUrl,
-                        Role = new ActorRoleDto
+                    src.MovieGenres
+                        .Where(mg => mg.Genre != null)
+                        .Select(mg => new GenreDto
                         {
-                            RoleName = ma.ActorRole.RoleName
-                        }
+                            Id = mg.GenreId,
+                            Name = mg.Genre.Name
+                        })))
+                .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
+                    src.MovieActors.Select(ma => new MovieActorDto
+                    {
+                        Actor = new ActorDto
+                        {
+                            Name = ma.Actor.Name,
+                            Bio = ma.Actor.Bio,
+                            BirthDate = ma.Actor.BirthDate,
+                            PhotoUrl = ma.Actor.PhotoUrl
+                        },
+                        CharacterName = ma.CharacterName,
+                        RoleName = ma.ActorRole.RoleName
                     })));
 
-            // Session <-> SessionDto
             CreateMap<Session, SessionDto>().ReverseMap()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // Ignore Id
-                .ForMember(dest => dest.Movie, opt => opt.Ignore()) // Ignore Navigation
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Movie, opt => opt.Ignore())
                 .ForMember(dest => dest.Room, opt => opt.Ignore())
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore());
 
-            CreateMap<GenreCreateDto, Genre>(); 
-            CreateMap<Genre, GenreDto>().ReverseMap();
+            CreateMap<GenreCreateDto, Genre>();
         }
     }
 }

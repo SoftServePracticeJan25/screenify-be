@@ -13,6 +13,6 @@ namespace Domain.DTOs.Api
         public string Title { get; set; }
         public int Duration { get; set; }
         public List<GenreDto> Genres { get; set; }
-        public List<ActorDto> Actors { get; set; }
+        public List<MovieActorDto> Actors { get; set; }
     }
 }

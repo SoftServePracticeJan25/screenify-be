@@ -14,6 +14,5 @@ namespace Domain.DTOs.Api
         public string Bio { get; set; } 
         public DateTime BirthDate { get; set; } 
         public string PhotoUrl { get; set; }
-        public ActorRoleDto Role { get; set; }
     }
 }

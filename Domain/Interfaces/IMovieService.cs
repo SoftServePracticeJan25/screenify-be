@@ -8,12 +8,12 @@ namespace Domain.Interfaces
         Task<IEnumerable<MovieReadDto>> GetAllAsync();
    
         Task<MovieReadDto?> GetByIdAsync(int id);
-     
-        Task AddAsync(MovieCreateDto movieCreateDto);
-   
+
+        Task<MovieReadDto> AddAsync(MovieCreateDto movieCreateDto);
+
         Task UpdateAsync(int id, MovieCreateDto movieCreateDto);
-      
-        Task DeleteAsync(int id);
+
+        Task<bool> DeleteAsync(int id);
     }
 
 

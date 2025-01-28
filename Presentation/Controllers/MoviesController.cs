@@ -47,11 +47,11 @@ namespace Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _movieService.AddAsync(movieCreateDto);
-            return CreatedAtAction(nameof(GetById), new { id = movieCreateDto.Title }, movieCreateDto);
+            var createdMovie = await _movieService.AddAsync(movieCreateDto);
+            return CreatedAtAction(nameof(GetById), new { id = createdMovie.Id }, createdMovie);
         }
 
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] MovieCreateDto movieCreateDto)
         {
