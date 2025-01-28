@@ -33,6 +33,7 @@ namespace Infrastructure.MappingProfiles
             CreateMap<MovieActor, MovieActorDto>().ReverseMap();
             CreateMap<MovieActor, MovieActorCreateDto>().ReverseMap();
             CreateMap<MovieActor, MovieActorUpdateDto>().ReverseMap();
+            CreateMap<MovieActor, MovieActorReadDto>().ReverseMap();
 
             CreateMap<Movie, MovieDto>();
             CreateMap<MovieGenre, MovieGenreDto>();
@@ -40,7 +41,7 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Review, ReviewDto>().ReverseMap();
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();
-            CreateMap<Review, ReviewViewDto>().ReverseMap();
+            CreateMap<Review, ReviewReadDto>().ReverseMap();
 
             CreateMap<Transaction, TransactionDto>().ReverseMap();
             CreateMap<Transaction, TransactionCreateDto>().ReverseMap();

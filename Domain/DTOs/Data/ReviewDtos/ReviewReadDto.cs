@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Domain.DTOs.Data.ReviewDtos
 {
-    public class ReviewViewDto
+    public class ReviewReadDto
     {
         public required int Rating { get; init; }
         public required string Comment { get; init; }
