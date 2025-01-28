@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.DTOs.Data.TicketDtos;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -44,10 +45,13 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Transaction, TransactionDto>().ReverseMap();
             CreateMap<Transaction, TransactionCreateDto>().ReverseMap();
             CreateMap<Transaction, TransactionUpdateDto>().ReverseMap();
+            
+            CreateMap<Ticket, TicketDto>().ReverseMap();
+            CreateMap<Ticket, TicketCreateDto>().ReverseMap();
+            CreateMap<Ticket, TicketUpdateDto>().ReverseMap();
 
             CreateMap<Room, RoomDto>();
             CreateMap<Session, SessionDto>();
-            CreateMap<Ticket, TicketDto>();
         }
     }
 }
