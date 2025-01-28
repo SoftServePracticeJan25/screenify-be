@@ -84,6 +84,7 @@ namespace Presentation
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
             builder.Services.AddScoped<IMovieService, MovieService>();
+            builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddScoped<IGenreService, GenreService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<ISessionService, SessionService>();

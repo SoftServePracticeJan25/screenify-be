@@ -11,7 +11,8 @@ namespace Infrastructure.MappingProfiles
         {
             //  Actor -> ActorDto
             CreateMap<Actor, ActorDto>();
-
+            CreateMap<Room, RoomReadDto>(); 
+            CreateMap<RoomCreateDto, Room>();
             //  ActorRole -> ActorRoleDto
             CreateMap<ActorRole, ActorRoleDto>();
 
