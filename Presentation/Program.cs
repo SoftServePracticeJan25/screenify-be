@@ -84,10 +84,18 @@ namespace Presentation
                 };
             });
 
+            /*
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            });
+            */
+
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IActorService, ActorService>();
             builder.Services.AddScoped<IActorRoleService, ActorRoleService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
             builder.Services.AddControllers();
 
