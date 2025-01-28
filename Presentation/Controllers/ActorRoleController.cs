@@ -44,7 +44,7 @@ namespace Presentation.Controllers
 
             await actorRoleService.AddAsync(actorRole);
 
-            return CreatedAtAction(nameof(GetById), new { id = actorRole.Id }, actorRole);
+            return CreatedAtAction(nameof(GetById), new { id = actorRole.Id }, mapper.Map<ActorRoleDto>(actorRole));
         }
 
         [HttpPut]
@@ -61,7 +61,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return base.Ok(mapper.Map<Domain.DTOs.Data.ActorRoleCreateDto>(actorRoleModel));
+            return base.Ok(mapper.Map<ActorRoleCreateDto>(actorRoleModel));
         }
 
         [HttpDelete]

@@ -48,6 +48,12 @@ namespace Presentation
                 });
             });
 
+
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
             var connectionString = builder.Configuration["ConnectionString"];
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -83,13 +89,6 @@ namespace Presentation
                         System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
                 };
             });
-
-            /*
-            builder.Services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-            });
-            */
 
             builder.Services.AddScoped<IMovieRepository, MovieRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();

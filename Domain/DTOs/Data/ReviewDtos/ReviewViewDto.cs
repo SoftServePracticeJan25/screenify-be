@@ -11,5 +11,6 @@ namespace Domain.DTOs.Data.ReviewDtos
         public required string Comment { get; init; }
         public required DateTime CreationTime { get; init; }
         public required int Likes { get; init; }
+        public required int MovieId { get; init; }
     }
 }

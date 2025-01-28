@@ -46,11 +46,10 @@ namespace Presentation.Controllers
             var appUser = await userManager.FindByNameAsync(username);
 
             var reviewModel = mapper.Map<Review>(reviewCreateDto);
-            reviewModel.AppUserId = appUser.Id;
 
             await reviewService.AddAsync(reviewModel);
 
-            return CreatedAtAction(nameof(GetById), new { id = reviewModel.Id }, reviewModel);
+            return CreatedAtAction(nameof(GetById), new { id = reviewModel.Id }, mapper.Map<ReviewViewDto>(reviewModel));
         }
 
         [HttpPut]
@@ -67,7 +66,9 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return Ok(mapper.Map<ReviewViewDto>(reviewModel));
+            var reviewDto = mapper.Map<ReviewViewDto>(reviewModel);
+
+            return Ok(reviewDto);
         }
 
         [HttpDelete]
