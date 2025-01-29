@@ -30,6 +30,7 @@ namespace Infrastructure.MappingProfiles
             CreateMap<ActorRole, ActorRoleCreateDto>().ReverseMap(); 
             CreateMap<ActorRole, ActorRoleReadDto>().ReverseMap();    
 
+
             CreateMap<CinemaType, CinemaTypeDto>();
             CreateMap<Genre, GenreDto>();
 

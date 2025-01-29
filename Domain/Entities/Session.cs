@@ -8,7 +8,7 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
         public DateTime StartTime { get; set; } = DateTime.Now;
-        [Column(TypeName = "decimal(4,2)")]
+        [Column(TypeName = "decimal(5,2)")]
         public decimal Price { get; set; }
 
         public int? MovieId { get; set; }
