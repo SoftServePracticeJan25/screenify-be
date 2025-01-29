@@ -1,3 +1,4 @@
+using AutoMapper;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
 using Domain.Interfaces;
@@ -9,18 +10,20 @@ namespace Infrastructure.Services
     public class TicketService : ITicketService
     {
         private readonly MovieDbContext _context;
-        public TicketService(MovieDbContext context)
+        private readonly IMapper _mapper;
+        public TicketService(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-        public async Task<Ticket> AddAsync(Ticket ticket)
+        public async Task<TicketReadDto> AddAsync(Ticket ticket)
         {
             await _context.Tickets.AddAsync(ticket);
             await _context.SaveChangesAsync();
-            return ticket;
+            return _mapper.Map<TicketReadDto>(ticket);
         }
 
-        public async Task<Ticket?> DeleteAsync(int id)
+        public async Task<TicketReadDto?> DeleteAsync(int id)
         {
             var ticketModel = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -31,17 +34,23 @@ namespace Infrastructure.Services
 
             _context.Tickets.Remove(ticketModel);
             await _context.SaveChangesAsync();
-            return ticketModel;
+            return _mapper.Map<TicketReadDto>(ticketModel);
         }
 
-        public async Task<List<Ticket>> GetAllAsync()
+        public async Task<List<TicketReadDto>> GetAllAsync()
         {
-            return await _context.Tickets.ToListAsync();
+            var tickets = await _context.Tickets.ToListAsync();
+            var ticketDtos = tickets.Select(x => _mapper.Map<TicketReadDto>(x)).ToList();
+
+            return ticketDtos;
         }
 
-        public async Task<Ticket?> GetByIdAsync(int id)
+        public async Task<TicketReadDto?> GetByIdAsync(int id)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+            var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+            var ticketDto = _mapper.Map<TicketReadDto>(ticket);
+
+            return ticketDto;
         }
 
         public async Task<bool> TicketExist(int id)
@@ -49,7 +58,7 @@ namespace Infrastructure.Services
             return await _context.Tickets.AnyAsync(s => s.Id == id);
         }
 
-        public async Task<Ticket?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto)
+        public async Task<TicketReadDto?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto)
         {
             var existingTicket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -64,7 +73,7 @@ namespace Infrastructure.Services
 
             await _context.SaveChangesAsync();
 
-            return existingTicket;
+            return _mapper.Map<TicketReadDto>(existingTicket);
         }
     }
 }

@@ -8,24 +8,27 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 namespace Services
 {
     public class ActorService : IActorService
     {
         private readonly MovieDbContext _context;
-        public ActorService(MovieDbContext context)
+        private readonly IMapper _mapper;
+        public ActorService(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<Actor> AddAsync(Actor actor)
+        public async Task<ActorReadDto> AddAsync(Actor actor)
         {
             await _context.Actors.AddAsync(actor);
             await _context.SaveChangesAsync();
-            return actor;
+            return _mapper.Map<ActorReadDto>(actor);
         }
 
-        public async Task<Actor?> DeleteAsync(int id)
+        public async Task<ActorReadDto?> DeleteAsync(int id)
         {
             var actorModel = await _context.Actors.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -36,20 +39,26 @@ namespace Services
 
             _context.Actors.Remove(actorModel);
             await _context.SaveChangesAsync();
-            return actorModel;
+            return _mapper.Map<ActorReadDto>(actorModel);
         }
 
-        public async Task<List<Actor>> GetAllAsync()
+        public async Task<List<ActorReadDto>> GetAllAsync()
         {
-            return await _context.Actors.ToListAsync();
+            var actors = await _context.Actors.ToListAsync();
+            var actorDtos = actors.Select(x => _mapper.Map<ActorReadDto>(x)).ToList();
+
+            return actorDtos;
         }
 
-        public async Task<Actor?> GetByIdAsync(int id)
+        public async Task<ActorReadDto?> GetByIdAsync(int id)
         {
-            return await _context.Actors.FirstOrDefaultAsync(x => x.Id == id);
+            var actor = await _context.Actors.FirstOrDefaultAsync(x => x.Id == id);
+            var actorDto = _mapper.Map<ActorReadDto>(actor);
+
+            return actorDto;
         }
 
-        public async Task<Actor?> UpdateAsync(int id, ActorUpdateDto actorUpdateDto)
+        public async Task<ActorReadDto?> UpdateAsync(int id, ActorUpdateDto actorUpdateDto)
         {
             var existingActor = await _context.Actors.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -65,7 +74,7 @@ namespace Services
 
             await _context.SaveChangesAsync();
 
-            return existingActor;
+            return _mapper.Map<ActorReadDto>(existingActor);
         }
 
         public async Task<bool> ActorExist(int id)

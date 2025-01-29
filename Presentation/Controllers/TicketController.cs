@@ -24,14 +24,14 @@ namespace Presentation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            Ticket? ticket = await ticketService.GetByIdAsync(id);
+            TicketReadDto? ticket = await ticketService.GetByIdAsync(id);
 
             if(ticket == null)
             {
                 return NotFound();
             }
 
-            return Ok(mapper.Map<TicketDto>(ticket));
+            return Ok(ticket);
         }
 
         [HttpPost]
@@ -44,7 +44,9 @@ namespace Presentation.Controllers
 
             await ticketService.AddAsync(ticket);
 
-            return CreatedAtAction(nameof(GetById), new { id = ticket.Id }, ticket);
+            var ticketDto = mapper.Map<TicketReadDto>(ticket);
+
+            return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
         }
 
         [HttpPut]
@@ -61,7 +63,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return Ok(mapper.Map<TicketDto>(ticketModel));
+            return Ok(ticketModel);
         }
 
         [HttpDelete]

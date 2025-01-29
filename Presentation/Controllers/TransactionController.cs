@@ -1,6 +1,7 @@
 using AutoMapper;
 using Domain.DTOs.Data;
 using Domain.DTOs.Data.Transactiondtos;
+using Domain.DTOs.Data.TransactionDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,14 +25,14 @@ namespace Presentation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            Transaction? transaction = await transactionService.GetByIdAsync(id);
+            TransactionReadDto? transaction = await transactionService.GetByIdAsync(id);
 
             if(transaction == null)
             {
                 return NotFound();
             }
 
-            return Ok(mapper.Map<TransactionDto>(transaction));
+            return Ok(transaction);
         }
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TransactionCreateDto transactionCreateDto)
@@ -43,7 +44,9 @@ namespace Presentation.Controllers
 
             await transactionService.AddAsync(transaction);
 
-            return CreatedAtAction(nameof(GetById), new { id = transaction.Id }, transaction);
+            var transactionDto = mapper.Map<TransactionReadDto>(transaction);
+
+            return CreatedAtAction(nameof(GetById), new { id = transactionDto.Id }, transactionDto);
         }
         [HttpPut]
         [Route("{id:int}")]
@@ -52,14 +55,14 @@ namespace Presentation.Controllers
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var transactionModel = await transactionService.UpdateAsync(id, transactionUpdateDto);
+            var transactionDto = await transactionService.UpdateAsync(id, transactionUpdateDto);
 
-            if(transactionModel == null)
+            if(transactionDto == null)
             {
                 return NotFound();
             }
 
-            return Ok(mapper.Map<TransactionDto>(transactionModel));
+            return Ok(transactionDto);
         }
         [HttpDelete]
         [Route("{id:int}")]

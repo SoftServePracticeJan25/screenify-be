@@ -9,11 +9,11 @@ namespace Domain.Interfaces
 {
     public interface IActorRoleService
     {
-        Task<List<ActorRole>> GetAllAsync();
-        Task<ActorRole?> GetByIdAsync(int id);
-        Task<ActorRole> AddAsync(ActorRole actorRole);
-        Task<ActorRole?> UpdateAsync(int id, ActorRoleUpdateDto actorRoleUpdateDto);
-        Task<ActorRole?> DeleteAsync(int id);
+        Task<List<ActorRoleReadDto>> GetAllAsync();
+        Task<ActorRoleReadDto?> GetByIdAsync(int id);
+        Task<ActorRoleReadDto> AddAsync(ActorRole actorRole);
+        Task<ActorRoleReadDto?> UpdateAsync(int id, ActorRoleUpdateDto actorRoleUpdateDto);
+        Task<ActorRoleReadDto?> DeleteAsync(int id);
         Task<bool> ActorRoleExist(int id);
     }
 }

@@ -7,26 +7,30 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Services
 {
     public class ActorRoleService : IActorRoleService
     {
         private readonly MovieDbContext _context;
+        private readonly IMapper _mapper;
 
-        public ActorRoleService(MovieDbContext context)
+        public ActorRoleService(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<ActorRole> AddAsync(ActorRole actorRole)
+        public async Task<ActorRoleReadDto> AddAsync(ActorRole actorRole)
         {
             await _context.ActorRoles.AddAsync(actorRole);
             await _context.SaveChangesAsync();
-            return actorRole;
+
+            return _mapper.Map<ActorRoleReadDto>(actorRole);
         }
 
-        public async Task<ActorRole?> DeleteAsync(int id)
+        public async Task<ActorRoleReadDto?> DeleteAsync(int id)
         {
             var actorRole = await _context.ActorRoles.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -37,20 +41,24 @@ namespace Services
 
             _context.ActorRoles.Remove(actorRole);
             await _context.SaveChangesAsync();
-            return actorRole;
+            return _mapper.Map<ActorRoleReadDto>(actorRole);
         }
 
-        public async Task<List<ActorRole>> GetAllAsync()
+        public async Task<List<ActorRoleReadDto>> GetAllAsync()
         {
-            return await _context.ActorRoles.ToListAsync();
+            var actorRoles = await _context.ActorRoles.ToListAsync();
+            var actorRoleDtos = actorRoles.Select(x => _mapper.Map<ActorRoleReadDto>(x)).ToList();
+
+            return actorRoleDtos;
         }
 
-        public async Task<ActorRole?> GetByIdAsync(int id)
+        public async Task<ActorRoleReadDto?> GetByIdAsync(int id)
         {
-            return await _context.ActorRoles.FirstOrDefaultAsync(x => x.Id == id);
+            var actorRole = await _context.ActorRoles.FirstOrDefaultAsync(x => x.Id == id);
+            return _mapper.Map<ActorRoleReadDto>(actorRole);
         }
 
-        public async Task<ActorRole?> UpdateAsync(int id, ActorRoleUpdateDto actorRoleUpdateDto)
+        public async Task<ActorRoleReadDto?> UpdateAsync(int id, ActorRoleUpdateDto actorRoleUpdateDto)
         {
             var existingActorRole = await _context.ActorRoles.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -63,7 +71,7 @@ namespace Services
 
             await _context.SaveChangesAsync();
 
-            return existingActorRole;
+            return _mapper.Map<ActorRoleReadDto>(existingActorRole);
         }
 
         public async Task<bool> ActorRoleExist(int id)

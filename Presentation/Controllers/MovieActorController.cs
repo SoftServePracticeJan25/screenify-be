@@ -30,7 +30,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return Ok(mapper.Map<MovieActorDto>(movieActor));
+            return Ok(movieActor);
         }
 
         [HttpPost]
@@ -43,7 +43,9 @@ namespace Presentation.Controllers
 
             await movieActorService.AddAsync(movieActorModel);
 
-            return CreatedAtAction(nameof(GetById), new { movieId = movieActorModel.MovieId, actorId = movieActorModel.ActorId }, movieActorCreateDto);
+            var movieActorDto = mapper.Map<MovieActorReadDto>(movieActorModel);
+
+            return CreatedAtAction(nameof(GetById), new { movieId = movieActorDto.MovieId, actorId = movieActorDto.ActorId }, movieActorDto);
         }
 
         [HttpPut("{movieId:int}/{actorId:int}")]
@@ -59,7 +61,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return Ok(mapper.Map<MovieActorDto>(movieActorModel));
+            return Ok(movieActorModel);
         }
 
 

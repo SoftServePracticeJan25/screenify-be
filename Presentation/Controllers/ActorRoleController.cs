@@ -24,14 +24,14 @@ namespace Presentation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            ActorRole? actorRole = await actorRoleService.GetByIdAsync(id);
+            ActorRoleReadDto? actorRole = await actorRoleService.GetByIdAsync(id);
 
             if (actorRole == null)
             {
                 return NotFound();
             }
 
-            return base.Ok(mapper.Map<ActorRoleDto>(actorRole));
+            return base.Ok(actorRole);
         }
 
         [HttpPost]
@@ -44,7 +44,9 @@ namespace Presentation.Controllers
 
             await actorRoleService.AddAsync(actorRole);
 
-            return CreatedAtAction(nameof(GetById), new { id = actorRole.Id }, mapper.Map<ActorRoleDto>(actorRole));
+            var actorRoleReadDto = mapper.Map<ActorRoleReadDto>(actorRole);
+
+            return CreatedAtAction(nameof(GetById), new { id = actorRoleReadDto.Id }, actorRoleReadDto);
         }
 
         [HttpPut]
@@ -61,7 +63,7 @@ namespace Presentation.Controllers
                 return NotFound();
             }
 
-            return base.Ok(mapper.Map<ActorRoleCreateDto>(actorRoleModel));
+            return base.Ok(actorRoleModel);
         }
 
         [HttpDelete]

@@ -4,11 +4,11 @@ namespace Domain.Interfaces
 {
     public interface ITicketService
     {
-        Task<List<Ticket>> GetAllAsync();
-        Task<Ticket?> GetByIdAsync(int id);
-        Task<Ticket> AddAsync(Ticket ticket);
-        Task<Ticket?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto);
-        Task <Ticket?> DeleteAsync(int id);
+        Task<List<TicketReadDto>> GetAllAsync();
+        Task<TicketReadDto?> GetByIdAsync(int id);
+        Task<TicketReadDto> AddAsync(Ticket ticket);
+        Task<TicketReadDto?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto);
+        Task <TicketReadDto?> DeleteAsync(int id);
         Task<bool> TicketExist(int id);
     }
 }

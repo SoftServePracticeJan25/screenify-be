@@ -5,11 +5,11 @@ namespace Domain.Interfaces
 {
     public interface IActorService
     {
-        Task<List<Actor>> GetAllAsync();
-        Task<Actor?> GetByIdAsync(int id);
-        Task<Actor> AddAsync(Actor actor);
-        Task<Actor?> UpdateAsync(int id, ActorUpdateDto actorUpdateDto);
-        Task <Actor?> DeleteAsync(int id);
+        Task<List<ActorReadDto>> GetAllAsync();
+        Task<ActorReadDto?> GetByIdAsync(int id);
+        Task<ActorReadDto> AddAsync(Actor actor);
+        Task<ActorReadDto?> UpdateAsync(int id, ActorUpdateDto actorUpdateDto);
+        Task <ActorReadDto?> DeleteAsync(int id);
         Task<bool> ActorExist(int id);
     }
 }

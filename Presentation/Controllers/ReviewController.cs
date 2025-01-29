@@ -26,14 +26,14 @@ namespace Presentation.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            Review? review = await reviewService.GetByIdAsync(id);
+            ReviewReadDto? review = await reviewService.GetByIdAsync(id);
 
             if(review == null)
             {
                 return NotFound();
             }
 
-            return Ok(mapper.Map<ReviewDto>(review));
+            return Ok(review);
         }
 
         [HttpPost]
@@ -50,24 +50,24 @@ namespace Presentation.Controllers
 
             await reviewService.AddAsync(reviewModel);
 
-            return CreatedAtAction(nameof(GetById), new { id = reviewModel.Id }, mapper.Map<ReviewReadDto>(reviewModel));
+            var reviewReadDto = mapper.Map<ReviewReadDto>(reviewModel);
+
+            return CreatedAtAction(nameof(GetById), new { id = reviewReadDto.Id }, reviewReadDto);
         }
 
         [HttpPut]
         [Route("{id:int}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ReviewUpdateDto actorUpdateDto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ReviewUpdateDto reviewUpdateDto)
         {
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var reviewModel = await reviewService.UpdateAsync(id, actorUpdateDto);
+            var reviewDto = await reviewService.UpdateAsync(id, reviewUpdateDto);
 
-            if(reviewModel == null)
+            if(reviewDto == null)
             {
                 return NotFound();
             }
-
-            var reviewDto = mapper.Map<ReviewReadDto>(reviewModel);
 
             return Ok(reviewDto);
         }

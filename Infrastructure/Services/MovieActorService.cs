@@ -7,25 +7,28 @@ using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Infrastructure.Services
 {
     public class MovieActorService : IMovieActorService
     {
         private readonly MovieDbContext _context;
-        public MovieActorService(MovieDbContext context)
+        private readonly IMapper _mapper;
+        public MovieActorService(MovieDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<MovieActor> AddAsync(MovieActor movieActor)
+        public async Task<MovieActorReadDto> AddAsync(MovieActor movieActor)
         {
             await _context.MovieActors.AddAsync(movieActor);
             await _context.SaveChangesAsync();
-            return movieActor;
+            return _mapper.Map<MovieActorReadDto>(movieActor);
         }
 
-        public async Task<MovieActor?> DeleteAsync(int movieId, int actorId)
+        public async Task<MovieActorReadDto?> DeleteAsync(int movieId, int actorId)
         {
             var movieActorModel = await _context.MovieActors.FirstOrDefaultAsync(x => x.MovieId == movieId && x.ActorId == actorId);
 
@@ -36,17 +39,23 @@ namespace Infrastructure.Services
 
             _context.MovieActors.Remove(movieActorModel);
             await _context.SaveChangesAsync();
-            return movieActorModel;
+            return _mapper.Map<MovieActorReadDto>(movieActorModel);
         }
 
-        public async Task<List<MovieActor>> GetAllAsync()
+        public async Task<List<MovieActorReadDto>> GetAllAsync()
         {
-            return await _context.MovieActors.ToListAsync();
+            var movieActors = await _context.MovieActors.ToListAsync();
+            var movieActorDtos = movieActors.Select(x => _mapper.Map<MovieActorReadDto>(x)).ToList();
+
+            return movieActorDtos;
         }
 
-        public async Task<MovieActor?> GetByIdAsync(int movieId, int actorId)
+        public async Task<MovieActorReadDto?> GetByIdAsync(int movieId, int actorId)
         {
-            return await _context.MovieActors.FirstOrDefaultAsync(x => x.MovieId == movieId && x.ActorId == actorId);
+            var movieActor = await _context.MovieActors.FirstOrDefaultAsync(x => x.MovieId == movieId && x.ActorId == actorId);
+            var movieActorDto = _mapper.Map<MovieActorReadDto>(movieActor);
+
+            return movieActorDto;
         }
 
         public async Task<bool> MovieActorExist(int movieId, int actorId)
@@ -54,7 +63,7 @@ namespace Infrastructure.Services
             return await _context.MovieActors.AnyAsync(x => x.MovieId == movieId && x.ActorId == actorId);;
         }
 
-        public async Task<MovieActor?> UpdateAsync(int movieId, int actorId, MovieActorUpdateDto reviewUpdateDto)
+        public async Task<MovieActorReadDto?> UpdateAsync(int movieId, int actorId, MovieActorUpdateDto reviewUpdateDto)
         {
             var existingMovieActor = await _context.MovieActors.FirstOrDefaultAsync(x => x.MovieId == movieId && x.ActorId == actorId);
 
@@ -68,7 +77,7 @@ namespace Infrastructure.Services
 
             await _context.SaveChangesAsync();
 
-            return existingMovieActor;
+            return _mapper.Map<MovieActorReadDto>(existingMovieActor);
         }
     }
 }
