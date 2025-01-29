@@ -89,7 +89,7 @@ namespace Infrastructure.Services
             existingMovie.MovieActors = movieCreateDto.Actors.Select(actor => new MovieActor
             {
                 ActorId = actor.ActorId,
-                ActorRoleId = actor.RoleId,
+                ActorRoleId = actor.ActorRoleId,
                 CharacterName = actor.CharacterName
             }).ToList();
 
