@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.DTOs.Data.MovieActorDtos;
+using Domain.DTOs.Data.GenreDtos;
 
 namespace Domain.DTOs.Api
 {
@@ -14,6 +15,6 @@ namespace Domain.DTOs.Api
         public string Title { get; set; }
         public int Duration { get; set; }
         public List<GenreDto> Genres { get; set; }
-        public List<MovieActorDto> Actors { get; set; }
+        public List<MovieActorReadListDto> Actors { get; set; }
     }
 }

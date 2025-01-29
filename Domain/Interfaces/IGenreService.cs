@@ -1,4 +1,4 @@
-﻿using Domain.DTOs.Api;
+﻿using Domain.DTOs.Data.GenreDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

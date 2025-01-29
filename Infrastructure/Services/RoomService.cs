@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Domain.DTOs.Data;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
-using Domain.DTOs.Api;
+using Domain.DTOs.Data.RoomDtos;
 
 namespace Infrastructure.Services
 {

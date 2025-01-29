@@ -1,4 +1,4 @@
-﻿using Domain.DTOs.Api;
+﻿using Domain.DTOs.Data.GenreDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;

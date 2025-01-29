@@ -1,10 +1,15 @@
-﻿namespace Domain.DTOs.Data
+﻿using System.Text.Json.Serialization;
+
+namespace Domain.DTOs.Data
 {
     public class ActorDto
     {
-        public required string Name { get; init; }
-        public required string Bio { get; init; }
-        public DateTime BirthDate { get; init; }
-        public required string PhotoUrl { get; init; }
+        public string Name { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] 
+        public string? Bio { get; set; }
+
+        public DateTime BirthDate { get; set; }
+        public string PhotoUrl { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿
-namespace Domain.DTOs.Data
+﻿namespace Domain.DTOs.Data.RoomDtos
 {
     public class RoomDto
     {

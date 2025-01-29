@@ -1,5 +1,5 @@
-﻿using Domain.DTOs.Api;
-using Domain.DTOs.Data;
+﻿using Domain.DTOs.Data;
+using Domain.DTOs.Data.RoomDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Domain.DTOs.Api;
 using Domain.DTOs.Data;
+using Domain.DTOs.Data.RoomDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;

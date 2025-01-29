@@ -7,13 +7,11 @@ using Domain.DTOs.Data.MovieActorDtos;
 using Domain.DTOs.Data.TransactionDtos;
 using Domain.DTOs.Data.Transactiondtos;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.DTOs.Api;
+using Domain.DTOs.Data.RoomDtos;
+using Domain.DTOs.Data.GenreDtos;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -21,26 +19,49 @@ namespace Infrastructure.MappingProfiles
     {
         public MapProfile()
         {
+
             CreateMap<Actor, ActorDto>().ReverseMap();
             CreateMap<Actor, ActorUpdateDto>().ReverseMap();
             CreateMap<Actor, ActorCreateDto>().ReverseMap();
             CreateMap<Actor, ActorReadDto>().ReverseMap();
 
+       
             CreateMap<ActorRole, ActorRoleDto>().ReverseMap();
             CreateMap<ActorRole, ActorRoleUpdateDto>().ReverseMap();
-            CreateMap<ActorRole, ActorRoleCreateDto>().ReverseMap(); 
+            CreateMap<ActorRole, ActorRoleCreateDto>().ReverseMap();
             CreateMap<ActorRole, ActorRoleReadDto>().ReverseMap();
 
+          
             CreateMap<Room, RoomReadDto>();
             CreateMap<RoomCreateDto, Room>();
-
             CreateMap<CinemaType, CinemaTypeDto>();
             CreateMap<Genre, GenreDto>().ReverseMap();
 
-            CreateMap<MovieActor, MovieActorDto>().ReverseMap();
-            CreateMap<MovieActor, MovieActorCreateDto>().ReverseMap();
+            
+            CreateMap<MovieActor, MovieActorDto>().ReverseMap(); 
+
+            
+            CreateMap<MovieActor, MovieActorReadListDto>()
+                .ForMember(dest => dest.Actor, opt => opt.MapFrom(src => new ActorDto
+                {
+                    Name = src.Actor.Name,
+                    BirthDate = src.Actor.BirthDate,
+                    PhotoUrl = src.Actor.PhotoUrl
+                }))
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => new ActorRoleDto
+                {
+                    RoleName = src.ActorRole.RoleName
+                }))
+                .ForMember(dest => dest.CharacterName, opt => opt.MapFrom(src => src.CharacterName));
+
+           
+            CreateMap<MovieActorCreateDto, MovieActor>().ReverseMap();
             CreateMap<MovieActor, MovieActorUpdateDto>().ReverseMap();
             CreateMap<MovieActor, MovieActorReadDto>().ReverseMap();
+
+
+            CreateMap<MovieActorCreateListDto, MovieActor>().ReverseMap();
+
 
             CreateMap<MovieCreateDto, Movie>()
                 .ForMember(dest => dest.MovieGenres, opt => opt.MapFrom(src =>
@@ -53,43 +74,40 @@ namespace Infrastructure.MappingProfiles
                         CharacterName = actor.CharacterName
                     })));
 
-            CreateMap<Movie, MovieReadDto>()
-               .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                   src.MovieGenres
-                       .Where(mg => mg.Genre != null)
-                       .Select(mg => new GenreDto
-                       {
-                           Id = mg.GenreId,
-                           Name = mg.Genre.Name
-                       })))
-               .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
-                   src.MovieActors.Select(ma => new MovieActorDto
-                   {         
-                       Actor = new ActorDto
-                       {
-                           Name = ma.Actor.Name,
-                           Bio = ma.Actor.Bio,
-                           BirthDate = ma.Actor.BirthDate,
-                           PhotoUrl = ma.Actor.PhotoUrl
-                       },           
-                       RoleName = new ActorRoleDto { RoleName = ma.ActorRole.RoleName},
-                       CharacterName = ma.CharacterName,
-                       MovieId = default,
-                       ActorId = default,
-                   })));
-            CreateMap<MovieGenre, MovieGenreDto>();
 
+            CreateMap<Movie, MovieReadDto>()
+                .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
+                    src.MovieGenres.Select(mg => new GenreDto
+                    {
+                        Id = mg.GenreId,
+                        Name = mg.Genre.Name
+                    })))
+                .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
+                    src.MovieActors.Select(ma => new MovieActorReadListDto
+                    {
+                        Actor = new ActorDto
+                        {
+                            Name = ma.Actor.Name,
+                            BirthDate = ma.Actor.BirthDate,
+                            PhotoUrl = ma.Actor.PhotoUrl
+                        },
+                        RoleName = new ActorRoleDto { RoleName = ma.ActorRole.RoleName },
+                        CharacterName = ma.CharacterName
+                    })));
+
+            
+            CreateMap<MovieGenre, MovieGenreDto>();
             CreateMap<Review, ReviewDto>().ReverseMap();
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();
             CreateMap<Review, ReviewReadDto>()
-            .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : "Unknown"));
+                .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : "Unknown"));
 
             CreateMap<Transaction, TransactionDto>().ReverseMap();
             CreateMap<Transaction, TransactionCreateDto>().ReverseMap();
             CreateMap<Transaction, TransactionUpdateDto>().ReverseMap();
             CreateMap<Transaction, TransactionReadDto>().ReverseMap();
-            
+
             CreateMap<Ticket, TicketDto>().ReverseMap();
             CreateMap<Ticket, TicketCreateDto>().ReverseMap();
             CreateMap<Ticket, TicketUpdateDto>().ReverseMap();

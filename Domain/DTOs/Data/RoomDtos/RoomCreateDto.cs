@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs.Api
+namespace Domain.DTOs.Data.RoomDtos
 {
     public class RoomCreateDto
     {

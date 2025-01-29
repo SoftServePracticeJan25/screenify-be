@@ -1,15 +1,14 @@
 ﻿
 using Domain.DTOs.Data.ActorRoleDtos;
+using System.Text.Json.Serialization;
 
 namespace Domain.DTOs.Data.MovieActorDtos
 {
     public class MovieActorDto
     {
-        public ActorDto Actor { get; set; }
-        public ActorRoleDto RoleName { get; set; }
-        public required int MovieId { get; init; }
-        public required int ActorId { get; init; }
-
-        public required string CharacterName { get; init; }
+        public int MovieId { get; set; } 
+        public int ActorId { get; set; }
+        public required int ActorRoleId { get; init; }
+        public string CharacterName { get; set; }
     }
 }
