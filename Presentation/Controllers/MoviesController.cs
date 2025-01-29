@@ -40,6 +40,7 @@ namespace Presentation.Controllers
 
         
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Add([FromBody] MovieCreateDto movieCreateDto)
         {
             if (!ModelState.IsValid)
