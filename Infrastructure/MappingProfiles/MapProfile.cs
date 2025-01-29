@@ -71,7 +71,7 @@ namespace Infrastructure.MappingProfiles
                 .ForMember(dest => dest.Room, opt => opt.Ignore())
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore());
 
-            CreateMap<GenreCreateDto, Genre>();
+            CreateMap<GenreCreateDto, Genre>(); // ready to merge
         }
     }
 }
