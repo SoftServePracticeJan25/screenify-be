@@ -14,6 +14,7 @@ namespace Domain.DTOs.Api
         public int Id { get; set; }
         public string Title { get; set; }
         public int Duration { get; set; }
+        public string? PosterUrl { get; set; }
         public List<GenreDto> Genres { get; set; }
         public List<MovieActorReadListDto> Actors { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿using Domain.DTOs.Data;
+﻿using Domain.DTOs.Data.SessionDtos;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

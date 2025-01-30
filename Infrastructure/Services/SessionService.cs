@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Domain.DTOs.Data;
+using Domain.DTOs.Data.SessionDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;

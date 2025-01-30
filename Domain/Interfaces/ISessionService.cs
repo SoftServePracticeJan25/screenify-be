@@ -1,4 +1,4 @@
-﻿using Domain.DTOs.Data;
+﻿using Domain.DTOs.Data.SessionDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

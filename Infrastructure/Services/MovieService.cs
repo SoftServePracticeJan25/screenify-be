@@ -86,12 +86,7 @@ namespace Infrastructure.Services
             existingMovie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
 
             _context.MovieActors.RemoveRange(existingMovie.MovieActors);
-            existingMovie.MovieActors = movieCreateDto.Actors.Select(actor => new MovieActor
-            {
-                ActorId = actor.ActorId,
-                ActorRoleId = actor.ActorRoleId,
-                CharacterName = actor.CharacterName
-            }).ToList();
+            existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
 
             await _context.SaveChangesAsync();
         }

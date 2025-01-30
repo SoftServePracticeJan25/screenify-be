@@ -12,6 +12,9 @@ using Domain.DTOs.Data.TicketDtos;
 using Domain.DTOs.Api;
 using Domain.DTOs.Data.RoomDtos;
 using Domain.DTOs.Data.GenreDtos;
+using Domain.DTOs.Data.CinemaTypeDtos;
+using Domain.DTOs.Data.MovieGenresDtos;
+using Domain.DTOs.Data.SessionDtos;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -121,6 +124,8 @@ namespace Infrastructure.MappingProfiles
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore());
 
             CreateMap<GenreCreateDto, Genre>();
+            CreateMap<CinemaType, CinemaTypeReadDto>().ReverseMap(); 
+            CreateMap<CinemaTypeDto, CinemaType>().ReverseMap();
         }
     }
 }
