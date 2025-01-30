@@ -1,7 +1,8 @@
-﻿namespace Domain.DTOs.Data
+namespace Domain.DTOs.Data.ActorDtos
 {
-    public class ActorDto
+    public class ActorReadDto
     {
+        public required int Id { get; set; }
         public required string Name { get; init; }
         public required string Bio { get; init; }
         public DateTime BirthDate { get; init; }

@@ -1,4 +1,4 @@
-﻿namespace Domain.DTOs.Data
+﻿namespace Domain.DTOs.Data.ActorRoleDtos
 {
     public class ActorRoleDto
     {

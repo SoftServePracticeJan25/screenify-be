@@ -1,6 +1,4 @@
-﻿
-
-namespace Domain.DTOs.Data
+﻿namespace Domain.DTOs.Data.SessionDtos
 {
     public class SessionDto
     {

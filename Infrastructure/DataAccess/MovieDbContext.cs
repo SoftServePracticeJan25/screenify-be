@@ -16,6 +16,7 @@ public class MovieDbContext: IdentityDbContext<AppUser>
     public DbSet<MovieActor> MovieActors { get; set; } // join table
     public DbSet<Actor> Actors { get; set; }
     public DbSet<ActorRole> ActorRoles { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
     public DbSet<MovieGenre> MovieGenres { get; set; } // join table
     public DbSet<Genre> Genres { get; set; }
     public DbSet<Review> Reviews { get; set; }

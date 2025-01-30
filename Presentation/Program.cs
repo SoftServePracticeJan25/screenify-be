@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Infrastructure.MappingProfiles;
 using Infrastructure.Repositories;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,6 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Services;
+using Infrastructure.MappingProfiles;
+using AutoMapper;
 
 namespace Presentation
 {
@@ -45,6 +49,12 @@ namespace Presentation
                 });
             });
 
+
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
+
             var connectionString = builder.Configuration["ConnectionString"];
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -80,11 +90,23 @@ namespace Presentation
                         System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
                 };
             });
-
-            builder.Services.AddScoped<IMovieRepository, MovieRepository>();
+            builder.Services.AddAutoMapper(typeof(Program));
+            builder.Services.AddAutoMapper(typeof(MapProfile));
+            builder.Services.AddScoped<IMovieService, MovieService>();
+            builder.Services.AddScoped<IRoomService, RoomService>();
+            builder.Services.AddScoped<IGenreService, GenreService>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-
+            builder.Services.AddScoped<IActorService, ActorService>();
+            builder.Services.AddScoped<IActorRoleService, ActorRoleService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IMovieActorService, MovieActorService>();
+            builder.Services.AddScoped<ITransactionService, TransactionService>();
+            builder.Services.AddScoped<ITicketService, TicketService>();
+            builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
             builder.Services.AddControllers();
+
+            builder.Services.AddAutoMapper(typeof(MapProfile));
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();

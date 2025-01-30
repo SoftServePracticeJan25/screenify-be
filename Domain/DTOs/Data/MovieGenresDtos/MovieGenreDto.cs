@@ -1,5 +1,4 @@
-﻿
-namespace Domain.DTOs.Data
+﻿namespace Domain.DTOs.Data.MovieGenresDtos
 {
     public class MovieGenreDto
     {

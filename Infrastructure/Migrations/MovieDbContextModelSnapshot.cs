@@ -107,7 +107,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("RefreshToken")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("RefreshTokenExpiryDate")
                         .HasColumnType("datetime(6)");
@@ -177,6 +178,9 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("int");
 
+                    b.Property<string>("PosterUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -214,7 +218,7 @@ namespace Infrastructure.Migrations
                     b.Property<int?>("MovieId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("GenreId")
+                    b.Property<int>("GenreId")
                         .HasColumnType("int");
 
                     b.HasKey("MovieId", "GenreId");
@@ -296,7 +300,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.Property<int?>("RoomId")
                         .HasColumnType("int");
@@ -354,13 +358,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<decimal>("Sum")
-                        .HasColumnType("decimal(4,2)");
+                        .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("Transaction");
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -391,13 +395,13 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "39943a75-ca76-43a5-804f-bc49b4aa8e3f",
+                            Id = "7a9de53f-7d32-4a61-87cc-5a2bbf9f56f3",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b7da0fb8-9b07-490b-8c27-69517a16f41a",
+                            Id = "4f3643c2-ca72-4b7f-8916-c0be220f9652",
                             Name = "User",
                             NormalizedName = "USER"
                         });
