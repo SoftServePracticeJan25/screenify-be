@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Extentions;
+using Domain.Helpers.QueryObject;
 
 namespace Presentation.Controllers
 {
@@ -16,9 +17,9 @@ namespace Presentation.Controllers
     {
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] ReviewQueryObject queryObject)
         {
-            var reviews = await reviewService.GetAllAsync();
+            var reviews = await reviewService.GetAllAsync(queryObject);
 
             return Ok(reviews);
         }
@@ -42,15 +43,14 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var username = User.GetUsername();
-            var appUser = await userManager.FindByNameAsync(username);
+            if(await reviewService.ReviewExist(reviewCreateDto.MovieId, reviewCreateDto.AppUserId))
+            {
+                return BadRequest("Review on this movie by this user already exist");
+            }
 
             var reviewModel = mapper.Map<Review>(reviewCreateDto);
-            reviewModel.AppUserId = appUser.Id;
-
-            await reviewService.AddAsync(reviewModel);
-
-            var reviewReadDto = mapper.Map<ReviewReadDto>(reviewModel);
+            
+            var reviewReadDto = await reviewService.AddAsync(reviewModel);
 
             return CreatedAtAction(nameof(GetById), new { id = reviewReadDto.Id }, reviewReadDto);
         }

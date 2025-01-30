@@ -10,6 +10,7 @@ using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Domain.Helpers.QueryObject;
 
 namespace Infrastructure.Services
 {
@@ -31,13 +32,23 @@ namespace Infrastructure.Services
         return _mapper.Map<ReviewReadDto>(review);
     }
 
-    public async Task<List<ReviewReadDto>> GetAllAsync()
+    public async Task<List<ReviewReadDto>> GetAllAsync(ReviewQueryObject query)
     {
-        var reviews = await _context.Reviews
-        .Include(r => r.AppUser) 
-        .ToListAsync();
+        var reviews = _context.Reviews.Include(r => r.AppUser).AsQueryable();
     
-    return reviews.Select(r => _mapper.Map<ReviewReadDto>(r)).ToList();
+        // Does filtration if movie id in query is not null
+        if(query.MovieId != null)
+        {
+            reviews = reviews.Where(r => r.MovieId == query.MovieId);
+        }
+
+        // Does filtration if appUser id in query is not null
+        if(!string.IsNullOrEmpty(query.AppUserId))
+        {
+            reviews = reviews.Where(r => r.AppUserId.Contains(query.AppUserId));
+        }
+
+        return reviews.Select(r => _mapper.Map<ReviewReadDto>(r)).ToList();
     }
 
     public async Task<ReviewReadDto?> GetByIdAsync(int id)
@@ -84,9 +95,9 @@ namespace Infrastructure.Services
         return _mapper.Map<ReviewReadDto>(reviewModel);
     }
 
-    public async Task<bool> ReviewExist(int id)
+    public async Task<bool> ReviewExist(int movieId, string appUserId)
     {
-        return await _context.Reviews.AnyAsync(s => s.Id == id);
+        return await _context.Reviews.AnyAsync(r => r.MovieId == movieId && r.AppUserId == appUserId);
     }
 }
 
