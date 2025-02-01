@@ -12,16 +12,15 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    permissions:
-      contents: read #This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '8.x'
+          include-prerelease: true
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
@@ -36,23 +35,23 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-      
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
+        uses: azure/webapps-deploy@v2
         with:
           app-name: 'screenify'
           slot-name: 'Production'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A451CD7086F942A78CF6FFE9B6DC6945 }}
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C73985DD12594A90A4580F20FC203DA1 }}
