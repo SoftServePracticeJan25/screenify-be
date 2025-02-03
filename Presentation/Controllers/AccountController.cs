@@ -1,6 +1,7 @@
 ﻿using Domain.DTOs.Account;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Extentions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ namespace Presentation.Controllers
     public class AccountController(
         UserManager<AppUser> userManager,
         ITokenService tokenService,
+        IUserInfoService userInfoService,
         SignInManager<AppUser> signInManager)
         : ControllerBase
     {
@@ -61,6 +63,7 @@ namespace Presentation.Controllers
                     Email = registerDto.Email,
                     RefreshToken = tokenService.CreateRefreshToken(),
                     RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30),
+                    PhotoUrl = registerDto.PhotoUrl,
                     Reviews = [],
                     Transactions = []
                 };
@@ -116,6 +119,22 @@ namespace Presentation.Controllers
                 RefreshToken = newRefreshToken
             });
         }
+        [HttpGet("user-info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var username = User.GetUsername();
+            var appUser = await userManager.FindByNameAsync(username);
 
+            UserInfoDto userInfo = await userInfoService.GetUserInfo(appUser);
+
+            if(userInfo != null)
+            {
+                return Ok(userInfo);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }

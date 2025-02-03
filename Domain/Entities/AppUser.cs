@@ -7,7 +7,7 @@ namespace Domain.Entities
     {
         [MaxLength(50)] public required string RefreshToken { get; set; }
         public required DateTime RefreshTokenExpiryDate { get; set; }
-
+        public string? PhotoUrl { get; set; }
         public required List<Review> Reviews { get; init; }
         public required List<Transaction> Transactions { get; init; }
     }

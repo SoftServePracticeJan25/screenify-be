@@ -15,6 +15,7 @@ using Domain.DTOs.Data.GenreDtos;
 using Domain.DTOs.Data.CinemaTypeDtos;
 using Domain.DTOs.Data.MovieGenresDtos;
 using Domain.DTOs.Data.SessionDtos;
+using Domain.DTOs.Account;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -126,6 +127,9 @@ namespace Infrastructure.MappingProfiles
             CreateMap<GenreCreateDto, Genre>();
             CreateMap<CinemaType, CinemaTypeReadDto>().ReverseMap(); 
             CreateMap<CinemaTypeDto, CinemaType>().ReverseMap();
+            
+            CreateMap<AppUser, RegisterDto>().ReverseMap();
+            CreateMap<AppUser, UserInfoDto>().ReverseMap();
         }
     }
 }
