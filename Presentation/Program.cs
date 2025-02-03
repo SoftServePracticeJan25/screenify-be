@@ -89,7 +89,28 @@ namespace Presentation
                     IssuerSigningKey = new SymmetricSecurityKey(
                         System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
                 };
+
+                options.Events = new JwtBearerEvents // AccessToken expiration error
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+
+                        var response = new
+                        {
+                            status = 401,
+                            error = "Unauthorized",
+                            message = "The provided token is expired or invalid."
+                        };
+
+                        await context.Response.WriteAsJsonAsync(response);
+                    }
+                };
             });
+
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
             builder.Services.AddScoped<IMovieService, MovieService>();
