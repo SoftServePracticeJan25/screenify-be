@@ -16,34 +16,40 @@ namespace Presentation.Controllers
         : ControllerBase
     {
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ValidationProblemDetails(ModelState));
 
-            var user = await userManager.Users.FirstOrDefaultAsync(x => x.UserName == loginDto.Username);
+            var user = await userManager.FindByNameAsync(loginDto.Username);
 
-            if (user == null) return Unauthorized("Invalid username!");
+            if (user == null)
+            {
+                return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "Login", new[] { "Username not found and/or password incorrect." } } }));
+            }
 
             var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
-            if (!result.Succeeded) return Unauthorized("Username not found and/or password incorrect :(");
+            if (!result.Succeeded)
+            {
+                return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "Login", new[] {"Username not found and/or password incorrect."} } }));
+            }
 
-
-            var refreshToken = tokenService.CreateRefreshToken();
-
-            user.RefreshToken = refreshToken;
-
-            user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
-
-            await userManager.UpdateAsync(user);
+            if (user.RefreshTokenExpiryDate < DateTime.UtcNow)
+            {
+                user.RefreshToken = tokenService.CreateRefreshToken();
+                user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
+                await userManager.UpdateAsync(user);
+            }
 
             return Ok(new
             {
                 user.UserName,
                 user.Email,
                 AccessToken = tokenService.CreateAccessToken(user),
-                RefreshToken = refreshToken
+                RefreshToken = user.RefreshToken
             });
         }
 
