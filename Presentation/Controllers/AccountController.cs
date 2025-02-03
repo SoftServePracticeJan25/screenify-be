@@ -50,48 +50,41 @@ namespace Presentation.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(new ValidationProblemDetails(ModelState));
+
+            var appUser = new AppUser
             {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
+                UserName = registerDto.Username,
+                Email = registerDto.Email,
+                RefreshToken = tokenService.CreateRefreshToken(),
+                RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30),
+                Reviews = [],
+                Transactions = []
+            };
 
-                var appUser = new AppUser
-                {
-                    UserName = registerDto.Username,
-                    Email = registerDto.Email,
-                    RefreshToken = tokenService.CreateRefreshToken(),
-                    RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30),
-                    Reviews = [],
-                    Transactions = []
-                };
-                
+            var createdUser = await userManager.CreateAsync(appUser, registerDto.Password);
 
-                var createdUser = await userManager.CreateAsync(appUser, registerDto.Password);
-
-                if (createdUser.Succeeded)
-                {
-                    var roleResult = await userManager.AddToRoleAsync(appUser, "User");
-                    if (roleResult.Succeeded)
-                    {
-                        return Ok(
-                            new NewUserDto
-                            {
-                                UserName = appUser.UserName,
-                                Email = appUser.Email,
-                                AccessToken = tokenService.CreateAccessToken(appUser),
-                                RefreshToken = appUser.RefreshToken
-                            });
-                    }
-
-                    return StatusCode(500, roleResult.Errors);
-                }
-
-                return StatusCode(500, createdUser.Errors);
-            }
-            catch (Exception e)
+            if (!createdUser.Succeeded)
             {
-                return StatusCode(500, e);
+                var errors = createdUser.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
+                return BadRequest(new ValidationProblemDetails(errors));
             }
+
+            var roleResult = await userManager.AddToRoleAsync(appUser, "User");
+            if (!roleResult.Succeeded)
+            {
+                var errors = roleResult.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
+                return BadRequest(new ValidationProblemDetails(errors));
+            }
+
+            return Ok(new NewUserDto
+            {
+                UserName = appUser.UserName,
+                Email = appUser.Email,
+                AccessToken = tokenService.CreateAccessToken(appUser),
+                RefreshToken = appUser.RefreshToken
+            });
         }
 
         [HttpPost("refresh-token")]
