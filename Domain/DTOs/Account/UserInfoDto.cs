@@ -16,5 +16,7 @@ namespace Domain.DTOs.Account
         public required int ReviewCount { get; init; }
         [Required]
         public required int TransactionCount { get; init; }
+        [Required]
+        public required string Role { get; init; }
     }
 }

@@ -34,9 +34,11 @@ namespace Infrastructure.Services
             .Include(u => u.Transactions)  // Подгружаем связанные транзакции
             .FirstOrDefaultAsync(u => u.Id == userId);
 
+            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+
             if (user == null)
                 throw new Exception("User not found");
-
+            
             return new UserInfoDto
             {
                 Id = user.Id,
@@ -44,7 +46,8 @@ namespace Infrastructure.Services
                 Username = user.UserName,
                 PhotoUrl = user.PhotoUrl, 
                 ReviewCount = user.Reviews.Count, 
-                TransactionCount = user.Transactions.Count 
+                TransactionCount = user.Transactions.Count,
+                Role = role
             };
         }
     }
