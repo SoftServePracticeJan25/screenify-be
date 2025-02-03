@@ -9,11 +9,8 @@ namespace Presentation.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController(
-        UserManager<AppUser> userManager,
-        ITokenService tokenService,
-        SignInManager<AppUser> signInManager)
-        : ControllerBase
+    public class AccountController(UserManager<AppUser> userManager, ITokenService tokenService,
+        SignInManager<AppUser> signInManager) : ControllerBase
     {
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
@@ -96,15 +93,25 @@ namespace Presentation.Controllers
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenDto refreshTokenDto)
         {
-            var user = await userManager.Users
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshTokenDto.RefreshToken && u.RefreshTokenExpiryDate > DateTime.UtcNow);
+            if (string.IsNullOrWhiteSpace(refreshTokenDto.RefreshToken))
+            {
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "RefreshToken", new[] {"Refresh token is required."} } }));
+            }
 
-            if (user == null) return Unauthorized("Invalid or expired refresh token");
+            var user = await userManager.Users
+                .SingleOrDefaultAsync(u => u.RefreshToken == refreshTokenDto.RefreshToken && u.RefreshTokenExpiryDate > DateTime.UtcNow);
+
+            if (user == null)
+            {
+                return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "RefreshToken", new[] {"Invalid or expired refresh token."} } }));
+            }
 
             var newAccessToken = tokenService.CreateAccessToken(user);
-            var newRefreshToken = tokenService.CreateRefreshToken();
 
-            user.RefreshToken = newRefreshToken;
+            user.RefreshToken = tokenService.CreateRefreshToken();
+
             user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
 
             await userManager.UpdateAsync(user);
@@ -112,7 +119,7 @@ namespace Presentation.Controllers
             return Ok(new
             {
                 AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken
+                RefreshToken = user.RefreshToken
             });
         }
 
