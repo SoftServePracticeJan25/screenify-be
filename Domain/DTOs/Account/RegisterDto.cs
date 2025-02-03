@@ -11,6 +11,5 @@ namespace Domain.DTOs.Account
         public required string Email { get; init; }
         [Required]
         public required string Password { get; init; }
-        public string? PhotoUrl { get; init; }
     }
 }

@@ -30,8 +30,8 @@ namespace Infrastructure.Services
             var userId = appUser.Id;
 
             var user = await _userManager.Users
-            .Include(u => u.Reviews)  // Подгружаем связанные отзывы
-            .Include(u => u.Transactions)  // Подгружаем связанные транзакции
+            .Include(u => u.Reviews)  
+            .Include(u => u.Transactions)  
             .FirstOrDefaultAsync(u => u.Id == userId);
 
             var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();

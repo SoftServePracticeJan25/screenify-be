@@ -63,7 +63,6 @@ namespace Presentation.Controllers
                     Email = registerDto.Email,
                     RefreshToken = tokenService.CreateRefreshToken(),
                     RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30),
-                    PhotoUrl = registerDto.PhotoUrl,
                     Reviews = [],
                     Transactions = []
                 };
