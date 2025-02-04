@@ -127,7 +127,9 @@ namespace Presentation.Controllers
                 RefreshToken = user.RefreshToken
             });
         }
+        
         [HttpGet("user-info")]
+        [Authorize]
         public async Task<IActionResult> GetUserInfo()
         {
             var username = User.GetUsername();
