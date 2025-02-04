@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Identity : Migration
+    public partial class AddPhotoUrlToAppUser : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -74,6 +76,11 @@ namespace Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RefreshToken = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    RefreshTokenExpiryDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    PhotoUrl = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -142,9 +149,9 @@ namespace Infrastructure.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Title = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Genre = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    ReleaseDate = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    PosterUrl = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -280,11 +287,36 @@ namespace Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Sum = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    AppUserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transactions_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Rooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SeatsAmount = table.Column<int>(type: "int", nullable: false),
                     CinemaTypeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -395,7 +427,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     StartTime = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(4,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                     MovieId = table.Column<int>(type: "int", nullable: true),
                     RoomId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -422,25 +454,34 @@ namespace Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     SeatNum = table.Column<int>(type: "int", nullable: false),
-                    AppUserId = table.Column<string>(type: "varchar(255)", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    TransactionId = table.Column<int>(type: "int", nullable: false),
                     SessionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tickets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tickets_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Tickets_Sessions_SessionId",
                         column: x => x.SessionId,
                         principalTable: "Sessions",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tickets_Transactions_TransactionId",
+                        column: x => x.TransactionId,
+                        principalTable: "Transactions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "1e572c94-6ffb-4c61-8174-a5a85860d750", null, "User", "USER" },
+                    { "94cfedc3-b5ed-4e77-aaf8-77ae2f3f9ac5", null, "Admin", "ADMIN" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -520,14 +561,19 @@ namespace Infrastructure.Migrations
                 column: "RoomId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tickets_AppUserId",
-                table: "Tickets",
-                column: "AppUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Tickets_SessionId",
                 table: "Tickets",
                 column: "SessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tickets_TransactionId",
+                table: "Tickets",
+                column: "TransactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_AppUserId",
+                table: "Transactions",
+                column: "AppUserId");
         }
 
         /// <inheritdoc />
@@ -573,16 +619,19 @@ namespace Infrastructure.Migrations
                 name: "Genres");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Sessions");
 
             migrationBuilder.DropTable(
-                name: "Sessions");
+                name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "Movies");
 
             migrationBuilder.DropTable(
                 name: "Rooms");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "CinemaTypes");
