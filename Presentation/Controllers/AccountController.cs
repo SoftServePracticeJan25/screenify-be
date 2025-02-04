@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Extentions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
