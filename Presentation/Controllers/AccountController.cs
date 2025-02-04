@@ -1,6 +1,7 @@
 ﻿using Domain.DTOs.Account;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Extentions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,8 +10,12 @@ namespace Presentation.Controllers
 {
     [Route("api/account")]
     [ApiController]
-    public class AccountController(UserManager<AppUser> userManager, ITokenService tokenService,
-        SignInManager<AppUser> signInManager) : ControllerBase
+    public class AccountController(
+        UserManager<AppUser> userManager,
+        ITokenService tokenService,
+        IUserInfoService userInfoService,
+        SignInManager<AppUser> signInManager)
+        : ControllerBase
     {
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
@@ -122,6 +127,22 @@ namespace Presentation.Controllers
                 RefreshToken = user.RefreshToken
             });
         }
+        [HttpGet("user-info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            var username = User.GetUsername();
+            var appUser = await userManager.FindByNameAsync(username);
 
+            UserInfoDto userInfo = await userInfoService.GetUserInfo(appUser);
+
+            if(userInfo != null)
+            {
+                return Ok(userInfo);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
     }
 }

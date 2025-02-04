@@ -105,6 +105,9 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("RefreshToken")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -395,13 +398,13 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7a9de53f-7d32-4a61-87cc-5a2bbf9f56f3",
+                            Id = "94cfedc3-b5ed-4e77-aaf8-77ae2f3f9ac5",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "4f3643c2-ca72-4b7f-8916-c0be220f9652",
+                            Id = "1e572c94-6ffb-4c61-8174-a5a85860d750",
                             Name = "User",
                             NormalizedName = "USER"
                         });

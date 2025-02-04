@@ -125,6 +125,7 @@ namespace Presentation
             builder.Services.AddScoped<ITransactionService, TransactionService>();
             builder.Services.AddScoped<ITicketService, TicketService>();
             builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
+            builder.Services.AddScoped<IUserInfoService, UserInfoService>();
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(MapProfile));
