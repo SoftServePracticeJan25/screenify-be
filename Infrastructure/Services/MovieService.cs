@@ -77,7 +77,7 @@ namespace Infrastructure.Services
         public async Task UpdateAsync(int id, MovieCreateDto movieCreateDto)
         {
             var existingMovie = await _context.Movies
-                .Include(m => m.MovieGenres)
+                .Include(m => m.MovieGenres) 
                 .Include(m => m.MovieActors)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -86,23 +86,30 @@ namespace Infrastructure.Services
 
             _mapper.Map(movieCreateDto, existingMovie);
 
-            _context.MovieGenres.RemoveRange(existingMovie.MovieGenres);
             if (movieCreateDto.GenreIds == null)
                 throw new ArgumentNullException(nameof(movieCreateDto.GenreIds), "GenreIds cannot be null.");
 
-            var genres = await _context.Genres
-                .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
+
+            var movieGenresToRemove = await _context.MovieGenres
+                .Where(mg => mg.MovieId == existingMovie.Id)
                 .ToListAsync();
 
-            existingMovie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+            _context.MovieGenres.RemoveRange(movieGenresToRemove);
+            await _context.SaveChangesAsync(); 
+
+            existingMovie.MovieGenres = movieCreateDto.GenreIds
+                .Select(genreId => new MovieGenre { MovieId = existingMovie.Id, GenreId = genreId })
+                .ToList();
 
             if (movieCreateDto.Actors == null)
                 throw new ArgumentNullException(nameof(movieCreateDto.Actors), "Actors list cannot be null.");
 
             existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
+
             await _context.SaveChangesAsync();
         }
-  
+
+
         public async Task<bool> DeleteAsync(int id)
         {
             var sessions = await _context.Sessions.Where(s => s.MovieId == id).ToListAsync();
