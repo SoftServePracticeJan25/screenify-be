@@ -135,17 +135,14 @@ namespace Presentation.Controllers
         {
             var username = User.GetUsername();
             var appUser = await userManager.FindByNameAsync(username);
-
-            UserInfoDto userInfo = await userInfoService.GetUserInfo(appUser);
-
-            if(userInfo != null)
-            {
-                return Ok(userInfo);
-            }
-            else
+            if (appUser == null)
             {
                 return NotFound();
             }
+
+            UserInfoDto userInfo = await userInfoService.GetUserInfo(appUser);
+
+                return Ok(userInfo);
         }
     }
 }

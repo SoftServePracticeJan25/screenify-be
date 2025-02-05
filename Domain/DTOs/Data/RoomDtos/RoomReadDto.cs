@@ -9,7 +9,7 @@ namespace Domain.DTOs.Data.RoomDtos
     public class RoomReadDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
         public int SeatsAmount { get; set; }
         public int? CinemaTypeId { get; set; }
     }

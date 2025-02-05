@@ -9,6 +9,6 @@ namespace Domain.DTOs.Data.GenreDtos
     public class GenreDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

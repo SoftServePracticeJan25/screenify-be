@@ -9,10 +9,10 @@ namespace Domain.DTOs.Api
 {
     public class MovieCreateDto
     {
-        public string Title { get; set; }
+        public string? Title { get; set; }
         public int Duration { get; set; }
         public string? PosterUrl { get; set; }
-        public List<int> GenreIds { get; set; }
-        public List<MovieActorCreateListDto> Actors { get; set; } 
+        public List<int>? GenreIds { get; set; }
+        public List<MovieActorCreateListDto>? Actors { get; set; } 
     }
 }
