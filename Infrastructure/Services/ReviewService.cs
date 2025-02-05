@@ -42,11 +42,11 @@ namespace Infrastructure.Services
             reviews = reviews.Where(r => r.MovieId == query.MovieId);
         }
 
-        // Does filtration if appUser id in query is not null
-        if(!string.IsNullOrEmpty(query.AppUserId))
-        {
-            reviews = reviews.Where(r => r.AppUserId.Contains(query.AppUserId));
-        }
+         // Does filtration if appUser id in query is not null
+         if (!string.IsNullOrEmpty(query.AppUserId))
+         {
+            reviews = reviews.Where(r => r.AppUserId != null && r.AppUserId.Contains(query.AppUserId));
+         }
 
             var reviewList = await reviews.ToListAsync(); // Now working async
             return _mapper.Map<List<ReviewReadDto>>(reviewList);
