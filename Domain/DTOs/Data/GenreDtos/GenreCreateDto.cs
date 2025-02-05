@@ -8,7 +8,7 @@ namespace Domain.DTOs.Data.GenreDtos
 {
     public class GenreCreateDto
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
 }

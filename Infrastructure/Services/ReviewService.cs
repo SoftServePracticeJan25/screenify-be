@@ -48,8 +48,9 @@ namespace Infrastructure.Services
             reviews = reviews.Where(r => r.AppUserId.Contains(query.AppUserId));
         }
 
-        return reviews.Select(r => _mapper.Map<ReviewReadDto>(r)).ToList();
-    }
+            var reviewList = await reviews.ToListAsync(); // Now working async
+            return _mapper.Map<List<ReviewReadDto>>(reviewList);
+        }
 
     public async Task<ReviewReadDto?> GetByIdAsync(int id)
     {

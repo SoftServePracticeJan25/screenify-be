@@ -48,11 +48,15 @@ namespace Infrastructure.Services
 
         public async Task<MovieReadDto> AddAsync(MovieCreateDto movieCreateDto)
         {
+            if (movieCreateDto.GenreIds == null || !movieCreateDto.GenreIds.Any())
+                throw new ArgumentNullException(nameof(movieCreateDto.GenreIds), "GenreIds cannot be null or empty.");
+
             var movie = _mapper.Map<Movie>(movieCreateDto);
 
             var genres = await _context.Genres
                 .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
                 .ToListAsync();
+
             movie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
 
             _context.Movies.Add(movie);
@@ -63,6 +67,9 @@ namespace Infrastructure.Services
                 .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
                 .Include(m => m.MovieActors).ThenInclude(ma => ma.ActorRole)
                 .FirstOrDefaultAsync(m => m.Id == movie.Id);
+
+            if (savedMovie == null)
+                throw new Exception("Failed to retrieve the saved movie.");
 
             return _mapper.Map<MovieReadDto>(savedMovie);
         }
@@ -80,14 +87,19 @@ namespace Infrastructure.Services
             _mapper.Map(movieCreateDto, existingMovie);
 
             _context.MovieGenres.RemoveRange(existingMovie.MovieGenres);
+            if (movieCreateDto.GenreIds == null)
+                throw new ArgumentNullException(nameof(movieCreateDto.GenreIds), "GenreIds cannot be null.");
+
             var genres = await _context.Genres
                 .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
                 .ToListAsync();
+
             existingMovie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
 
-            _context.MovieActors.RemoveRange(existingMovie.MovieActors);
-            existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
+            if (movieCreateDto.Actors == null)
+                throw new ArgumentNullException(nameof(movieCreateDto.Actors), "Actors list cannot be null.");
 
+            existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
             await _context.SaveChangesAsync();
         }
   

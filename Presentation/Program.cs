@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Services;
-using Infrastructure.MappingProfiles;
 using AutoMapper;
 
 namespace Presentation

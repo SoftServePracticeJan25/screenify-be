@@ -9,6 +9,6 @@ namespace Domain.DTOs.Data.CinemaTypeDtos
     public class CinemaTypeReadDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }
