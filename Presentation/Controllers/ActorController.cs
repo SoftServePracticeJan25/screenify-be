@@ -13,7 +13,7 @@ namespace Presentation.Controllers
     public class ActorController(IActorService actorService, IMapper mapper) : ControllerBase
     {
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var actors = await actorService.GetAllAsync();
@@ -22,6 +22,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             ActorReadDto? actor = await actorService.GetByIdAsync(id);
@@ -35,6 +36,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] ActorCreateDto actorCreateDto)
         {
             if (!ModelState.IsValid)
@@ -51,6 +53,7 @@ namespace Presentation.Controllers
 
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ActorUpdateDto actorUpdateDto)
         {
             if(!ModelState.IsValid)
@@ -68,6 +71,7 @@ namespace Presentation.Controllers
 
         [HttpDelete]
         [Route("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             if(!ModelState.IsValid)

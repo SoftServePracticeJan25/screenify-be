@@ -1,5 +1,6 @@
 ﻿using Domain.DTOs.Data.CinemaTypeDtos;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -17,6 +18,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var cinematypes = await _cinemaTypeService.GetAllAsync();
@@ -24,6 +26,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var cinematypes = await _cinemaTypeService.GetByIdAsync(id);
@@ -32,6 +35,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CinemaTypeDto cinemaTypeDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
@@ -41,6 +45,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] CinemaTypeDto cinemaTypeDto)
         {
             if (!ModelState.IsValid) { return BadRequest(ModelState); }
@@ -50,6 +55,7 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _cinemaTypeService.DeleteAsync(id);

@@ -25,20 +25,18 @@ namespace Presentation.Controllers
                 return BadRequest(new ValidationProblemDetails(ModelState));
 
             var user = await userManager.FindByNameAsync(loginDto.Username);
-
             if (user == null)
             {
-                return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
-                { { "Login", new[] { "Username not found and/or password incorrect." } } }));
+                return Unauthorized(new { Message = "Username or password incorrect." });
             }
 
             var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
             if (!result.Succeeded)
             {
-                return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
-                { { "Login", new[] {"Username not found and/or password incorrect."} } }));
+                return Unauthorized(new { Message = "Username or password incorrect." });
             }
+
+            var roles = await userManager.GetRolesAsync(user); 
 
             if (user.RefreshTokenExpiryDate < DateTime.UtcNow)
             {
@@ -51,10 +49,11 @@ namespace Presentation.Controllers
             {
                 user.UserName,
                 user.Email,
-                AccessToken = tokenService.CreateAccessToken(user),
+                AccessToken = tokenService.CreateAccessToken(user, roles.ToList()), 
                 RefreshToken = user.RefreshToken
             });
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
@@ -73,25 +72,24 @@ namespace Presentation.Controllers
             };
 
             var createdUser = await userManager.CreateAsync(appUser, registerDto.Password);
-
             if (!createdUser.Succeeded)
             {
-                var errors = createdUser.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
-                return BadRequest(new ValidationProblemDetails(errors));
+                return BadRequest(new ValidationProblemDetails(createdUser.Errors.ToDictionary(e => e.Code, e => new[] { e.Description })));
             }
 
-            var roleResult = await userManager.AddToRoleAsync(appUser, "User");
+            var roleResult = await userManager.AddToRoleAsync(appUser, "User"); // ✅ Назначаем дефолтную роль
             if (!roleResult.Succeeded)
             {
-                var errors = roleResult.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
-                return BadRequest(new ValidationProblemDetails(errors));
+                return BadRequest(new ValidationProblemDetails(roleResult.Errors.ToDictionary(e => e.Code, e => new[] { e.Description })));
             }
+
+            var roles = await userManager.GetRolesAsync(appUser); // ✅ Получаем роли
 
             return Ok(new NewUserDto
             {
                 UserName = appUser.UserName,
                 Email = appUser.Email,
-                AccessToken = tokenService.CreateAccessToken(appUser),
+                AccessToken = tokenService.CreateAccessToken(appUser, roles.ToList()), // ✅ Передаём роли
                 RefreshToken = appUser.RefreshToken
             });
         }
@@ -102,7 +100,7 @@ namespace Presentation.Controllers
             if (string.IsNullOrWhiteSpace(refreshTokenDto.RefreshToken))
             {
                 return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
-                { { "RefreshToken", new[] {"Refresh token is required."} } }));
+        { { "RefreshToken", new[] { "Refresh token is required." } } }));
             }
 
             var user = await userManager.Users
@@ -111,13 +109,16 @@ namespace Presentation.Controllers
             if (user == null)
             {
                 return Unauthorized(new ValidationProblemDetails(new Dictionary<string, string[]>
-                { { "RefreshToken", new[] {"Invalid or expired refresh token."} } }));
+        { { "RefreshToken", new[] { "Invalid or expired refresh token." } } }));
             }
 
-            var newAccessToken = tokenService.CreateAccessToken(user);
+            // ✅ Получаем роли пользователя
+            var roles = await userManager.GetRolesAsync(user);
+
+            // ✅ Передаём список ролей в `CreateAccessToken`
+            var newAccessToken = tokenService.CreateAccessToken(user, roles.ToList());
 
             user.RefreshToken = tokenService.CreateRefreshToken();
-
             user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
 
             await userManager.UpdateAsync(user);
@@ -128,7 +129,8 @@ namespace Presentation.Controllers
                 RefreshToken = user.RefreshToken
             });
         }
-        
+
+
         [HttpGet("user-info")]
         [Authorize]
         public async Task<IActionResult> GetUserInfo()
