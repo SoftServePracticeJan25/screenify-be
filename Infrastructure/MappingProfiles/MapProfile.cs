@@ -16,6 +16,7 @@ using Domain.DTOs.Data.CinemaTypeDtos;
 using Domain.DTOs.Data.MovieGenresDtos;
 using Domain.DTOs.Data.SessionDtos;
 using Domain.DTOs.Account;
+using Domain.DTOs.MovieDtos;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -72,6 +73,9 @@ namespace Infrastructure.MappingProfiles
                         ActorRoleId = actor.ActorRoleId,
                         CharacterName = actor.CharacterName
                     })));
+
+            CreateMap<MovieUpdateDto, Movie>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Movie, MovieReadDto>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
@@ -133,4 +137,5 @@ namespace Infrastructure.MappingProfiles
             CreateMap<AppUser, UserInfoDto>().ReverseMap();
         }
     }
+
 }
