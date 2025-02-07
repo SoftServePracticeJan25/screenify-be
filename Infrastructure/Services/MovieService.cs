@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Domain.DTOs.Api;
+using Domain.DTOs.MovieDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
@@ -107,6 +108,38 @@ namespace Infrastructure.Services
             existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<MovieReadDto> PatchAsync(int id, MovieUpdateDto movieUpdateDto)
+        {
+            var movie = await _context.Movies
+                .Include(m => m.MovieGenres)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (movie == null)
+                throw new KeyNotFoundException($"Movie with ID {id} not found.");
+
+            // Обновляем только переданные поля
+            if (!string.IsNullOrEmpty(movieUpdateDto.Title))
+                movie.Title = movieUpdateDto.Title;
+
+            if (movieUpdateDto.Duration.HasValue)
+                movie.Duration = movieUpdateDto.Duration.Value;
+
+            if (!string.IsNullOrEmpty(movieUpdateDto.PosterUrl))
+                movie.PosterUrl = movieUpdateDto.PosterUrl;
+
+            if (movieUpdateDto.GenreIds != null)
+            {
+                var genres = await _context.Genres
+                    .Where(g => movieUpdateDto.GenreIds.Contains(g.Id))
+                    .ToListAsync();
+
+                movie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+            }
+
+            await _context.SaveChangesAsync();
+            return _mapper.Map<MovieReadDto>(movie);
         }
 
 

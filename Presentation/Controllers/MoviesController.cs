@@ -1,5 +1,6 @@
 ﻿using Domain.DTOs.Api;
 using Domain.DTOs.Data;
+using Domain.DTOs.MovieDtos;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -71,7 +72,25 @@ namespace Presentation.Controllers
             return NoContent();
         }
 
-        
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(int id, [FromBody] MovieUpdateDto movieUpdateDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var movie = await _movieService.GetByIdAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            var updatedMovie = await _movieService.PatchAsync(id, movieUpdateDto);
+            return Ok(updatedMovie);
+        }
+
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
