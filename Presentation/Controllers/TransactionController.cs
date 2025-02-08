@@ -11,7 +11,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/transaction")]
-    public class TransactionController(ITransactionService transactionService, IMapper mapper) : ControllerBase
+    public class TransactionController(ITransactionService transactionService, IMapper mapper, IFilesGenerationService filesGenerationService) : ControllerBase
     {
         [HttpGet]
         [Authorize]
@@ -45,6 +45,9 @@ namespace Presentation.Controllers
             await transactionService.AddAsync(transaction);
 
             var transactionDto = mapper.Map<TransactionReadDto>(transaction);
+
+            // byte[] pdfBytes = filesGenerationService.GenerateInvoice(transaction);
+            // return File(pdfBytes, "application/pdf", "ticket.pdf");
 
             return CreatedAtAction(nameof(GetById), new { id = transactionDto.Id }, transactionDto);
         }

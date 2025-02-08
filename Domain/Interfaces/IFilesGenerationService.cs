@@ -8,5 +8,7 @@ namespace Domain.Interfaces
     public interface IFilesGenerationService
     {
         byte[] GenerateTicketPdf(Ticket ticket);
+        public byte[] GenerateInvoice(Transaction transaction);
+        public string GenerateCalendarEvent(Ticket ticket);
     }
 }

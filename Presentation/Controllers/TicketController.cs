@@ -1,3 +1,4 @@
+using System.Text;
 using AutoMapper;
 using Domain.DTOs.Data;
 using Domain.DTOs.Data.TicketDtos;
@@ -45,6 +46,7 @@ namespace Presentation.Controllers
             var ticket = mapper.Map<Ticket>(ticketCreateDto);
             await ticketService.AddAsync(ticket);
 
+            // EVENT FILE
             var ticketWithDetails = await context.Tickets
                 .Include(t => t.Session)
                 .ThenInclude(s => s.Movie)
@@ -54,8 +56,27 @@ namespace Presentation.Controllers
             if (ticketWithDetails == null)
                 return NotFound("Ticket not found after creation.");
 
-            byte[] pdfBytes = filesGenerationService.GenerateTicketPdf(ticketWithDetails);
-            return File(pdfBytes, "application/pdf", "ticket.pdf");
+            string icsContent = filesGenerationService.GenerateCalendarEvent(ticket);
+
+            return File(Encoding.UTF8.GetBytes(icsContent), "text/calendar", "event.ics");
+            
+            // TICKET PDF
+            // var ticketWithDetails = await context.Tickets
+            //     .Include(t => t.Session)
+            //     .ThenInclude(s => s.Movie)
+            //     .Include(t => t.Session.Room)
+            //     .FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+            // if (ticketWithDetails == null)
+            //     return NotFound("Ticket not found after creation.");
+
+            // byte[] pdfBytes = filesGenerationService.GenerateTicketPdf(ticketWithDetails);
+            // return File(pdfBytes, "application/pdf", "ticket.pdf");
+            
+            // DEFAULT
+            // var ticketDto = mapper.Map<TicketReadDto>(ticket);
+
+            // return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
         }
 
 
