@@ -22,7 +22,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id:int}")]
-        [Authorize(Roles = "User,Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
             ActorReadDto? actor = await actorService.GetByIdAsync(id);
