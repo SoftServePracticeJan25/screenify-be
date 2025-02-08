@@ -3,14 +3,16 @@ using Domain.DTOs.Data;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/ticket")]
-    public class TicketController(ITicketService ticketService, IMapper mapper) : ControllerBase
+    public class TicketController(ITicketService ticketService, IMapper mapper, IFilesGenerationService filesGenerationService, MovieDbContext context) : ControllerBase
     {
         [HttpGet]
         [Authorize]
@@ -41,13 +43,21 @@ namespace Presentation.Controllers
                 return BadRequest(ModelState);
 
             var ticket = mapper.Map<Ticket>(ticketCreateDto);
-
             await ticketService.AddAsync(ticket);
 
-            var ticketDto = mapper.Map<TicketReadDto>(ticket);
+            var ticketWithDetails = await context.Tickets
+                .Include(t => t.Session)
+                .ThenInclude(s => s.Movie)
+                .Include(t => t.Session.Room)
+                .FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
-            return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
+            if (ticketWithDetails == null)
+                return NotFound("Ticket not found after creation.");
+
+            byte[] pdfBytes = filesGenerationService.GenerateTicketPdf(ticketWithDetails);
+            return File(pdfBytes, "application/pdf", "ticket.pdf");
         }
+
 
         [HttpPut]
         [Route("{id:int}")]
