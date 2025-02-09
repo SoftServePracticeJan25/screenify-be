@@ -46,9 +46,6 @@ namespace Presentation.Controllers
 
             var transactionDto = mapper.Map<TransactionReadDto>(transaction);
 
-            // byte[] pdfBytes = filesGenerationService.GenerateInvoice(transaction);
-            // return File(pdfBytes, "application/pdf", "ticket.pdf");
-
             return CreatedAtAction(nameof(GetById), new { id = transactionDto.Id }, transactionDto);
         }
         [HttpPut]

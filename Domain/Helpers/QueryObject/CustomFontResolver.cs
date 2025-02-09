@@ -8,7 +8,7 @@ namespace Domain.Helpers.QueryObject
     {
         public byte[] GetFont(string faceName)
         {
-            var fontPath = "C:/Users/Terrin Tin/Downloads/cour.ttf"; // Убедитесь, что путь правильный
+            var fontPath = "../fonts/cour.ttf";
             if (!File.Exists(fontPath))
                 throw new InvalidOperationException($"Font file not found: {fontPath}");
 
@@ -22,7 +22,7 @@ namespace Domain.Helpers.QueryObject
                 return new FontResolverInfo("Courier");
             }
 
-            return null; // Если запрашивается другой шрифт, оставляем null (PdfSharp может выбрать дефолтный)
+            return null; 
         }
 
         public string DefaultFontName => "Courier New";

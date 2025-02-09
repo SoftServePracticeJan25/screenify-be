@@ -135,7 +135,7 @@ namespace Infrastructure.MappingProfiles
                 src.Session != null && src.Session.Movie != null && src.Session.Movie.Duration > 0 
                     ? src.Session.StartTime.AddMinutes(src.Session.Movie.Duration) 
                     : src.Session.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
-            .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1, Odesa, Odesa Oblast, 65044"));
+            .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1Ф, Odesa, Odesa Oblast, 65000"));
 
             CreateMap<Room, RoomDto>();
             CreateMap<Session, SessionDto>().ReverseMap()
