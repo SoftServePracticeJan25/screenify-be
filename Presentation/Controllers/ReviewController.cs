@@ -64,7 +64,7 @@ namespace Presentation.Controllers
             var userId = userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            // Только автор или админ может редактировать отзыв
+            
             if (review.AppUserId != userId && !isAdmin)
             {
                 return Forbid(); // 403 Forbidden
@@ -87,7 +87,7 @@ namespace Presentation.Controllers
             var userId = userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            // Только автор или админ может удалить отзыв
+            
             if (review.AppUserId != userId && !isAdmin)
             {
                 return Forbid(); // 403 Forbidden
