@@ -25,18 +25,22 @@ namespace Infrastructure.Services
         public string CreateAccessToken(AppUser user, List<string> roles)
         {
             if (user == null)
+            {
                 throw new ArgumentNullException(nameof(user), "User cannot be null when generating a token.");
+            }
+
+            var email = user.Email ?? throw new ArgumentNullException(nameof(user.Email), "User email cannot be null.");
+            var userName = user.UserName ?? throw new ArgumentNullException(nameof(user.UserName), "User name cannot be null.");
 
             if (roles == null || !roles.Any())
                 throw new ArgumentException("User must have at least one role.", nameof(roles));
 
             var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new ArgumentNullException(nameof(user.Email), "User email cannot be null.")),
-        new Claim(JwtRegisteredClaimNames.GivenName, user.UserName ?? throw new ArgumentNullException(nameof(user.UserName), "User name cannot be null.")),
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id) // Added userId in JWT TOKEN
-    };
-
+            {
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(JwtRegisteredClaimNames.GivenName, userName),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id) // Added userId in JWT TOKEN
+            };
             
             foreach (var role in roles)
             {
