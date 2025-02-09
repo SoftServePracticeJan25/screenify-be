@@ -4,6 +4,7 @@ using Domain.DTOs.Data.RoomDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,14 +21,16 @@ namespace Presentation.Controllers
             _roomService = roomService;
         }
 
-        [HttpGet] 
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var rooms = await _roomService.GetAllAsync();
             return Ok(rooms);
         }
 
-        [HttpGet("{id}")] 
+        [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var room = await _roomService.GetByIdAsync(id);
@@ -38,7 +41,8 @@ namespace Presentation.Controllers
             return Ok(room);
         }
 
-        [HttpPost] 
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] RoomCreateDto roomCreateDto)
         {
             if (!ModelState.IsValid)
@@ -50,7 +54,8 @@ namespace Presentation.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdRoom.Id }, createdRoom);
         }
 
-        [HttpPut("{id}")] 
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] RoomCreateDto roomCreateDto)
         {
             if (!ModelState.IsValid)
@@ -67,7 +72,8 @@ namespace Presentation.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")] 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _roomService.DeleteAsync(id);

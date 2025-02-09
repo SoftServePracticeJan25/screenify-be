@@ -40,6 +40,8 @@ namespace Presentation.Controllers
                 { { "Login", new[] {"Username not found and/or password incorrect."} } }));
             }
 
+            var roles = await userManager.GetRolesAsync(user); 
+
             if (user.RefreshTokenExpiryDate < DateTime.UtcNow)
             {
                 user.RefreshToken = tokenService.CreateRefreshToken();
@@ -51,10 +53,11 @@ namespace Presentation.Controllers
             {
                 user.UserName,
                 user.Email,
-                AccessToken = tokenService.CreateAccessToken(user),
+                AccessToken = tokenService.CreateAccessToken(user, roles.ToList()), 
                 RefreshToken = user.RefreshToken
             });
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
@@ -73,7 +76,6 @@ namespace Presentation.Controllers
             };
 
             var createdUser = await userManager.CreateAsync(appUser, registerDto.Password);
-
             if (!createdUser.Succeeded)
             {
                 var errors = createdUser.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
@@ -87,11 +89,13 @@ namespace Presentation.Controllers
                 return BadRequest(new ValidationProblemDetails(errors));
             }
 
+            var roles = await userManager.GetRolesAsync(appUser); 
+
             return Ok(new NewUserDto
             {
                 UserName = appUser.UserName,
                 Email = appUser.Email,
-                AccessToken = tokenService.CreateAccessToken(appUser),
+                AccessToken = tokenService.CreateAccessToken(appUser, roles.ToList()), 
                 RefreshToken = appUser.RefreshToken
             });
         }
@@ -114,10 +118,13 @@ namespace Presentation.Controllers
                 { { "RefreshToken", new[] {"Invalid or expired refresh token."} } }));
             }
 
-            var newAccessToken = tokenService.CreateAccessToken(user);
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            
+            var newAccessToken = tokenService.CreateAccessToken(user, roles.ToList());
 
             user.RefreshToken = tokenService.CreateRefreshToken();
-
             user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
 
             await userManager.UpdateAsync(user);
@@ -128,7 +135,8 @@ namespace Presentation.Controllers
                 RefreshToken = user.RefreshToken
             });
         }
-        
+
+
         [HttpGet("user-info")]
         [Authorize]
         public async Task<IActionResult> GetUserInfo()

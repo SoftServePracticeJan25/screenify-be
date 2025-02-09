@@ -119,7 +119,6 @@ namespace Infrastructure.Services
             if (movie == null)
                 throw new KeyNotFoundException($"Movie with ID {id} not found.");
 
-            // Обновляем только переданные поля
             if (!string.IsNullOrEmpty(movieUpdateDto.Title))
                 movie.Title = movieUpdateDto.Title;
 

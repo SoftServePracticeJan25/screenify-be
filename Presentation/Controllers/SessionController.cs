@@ -1,5 +1,6 @@
 ﻿using Domain.DTOs.Data.SessionDtos;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -15,6 +16,7 @@ namespace Presentation.Controllers
             _sessionService = sessionService;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var sessions = await _sessionService.GetAllAsync();
@@ -22,7 +24,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var sessions = await _sessionService.GetByIdAsync(id);
@@ -34,6 +36,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(SessionDto session)
         {
             var createdSession = await _sessionService.CreateAsync(session);
@@ -41,6 +44,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, SessionDto session)
         {
             try
@@ -55,6 +59,7 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _sessionService.DeleteAsync(id);
