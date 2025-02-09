@@ -61,6 +61,7 @@ namespace Presentation.Controllers
         }
         [HttpPut]
         [Route("{id:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] TransactionUpdateDto transactionUpdateDto)
         {
             if(!ModelState.IsValid)
