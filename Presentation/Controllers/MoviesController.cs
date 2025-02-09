@@ -19,6 +19,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var movies = await _movieService.GetAllAsync();
@@ -27,7 +28,7 @@ namespace Presentation.Controllers
 
         
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetById(int id)
         {
             var movie = await _movieService.GetByIdAsync(id);
@@ -41,7 +42,7 @@ namespace Presentation.Controllers
 
         
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Add([FromBody] MovieCreateDto movieCreateDto)
         {
             if (!ModelState.IsValid)
@@ -55,6 +56,7 @@ namespace Presentation.Controllers
 
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] MovieCreateDto movieCreateDto)
         {
             if (!ModelState.IsValid)
@@ -73,6 +75,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Patch(int id, [FromBody] MovieUpdateDto movieUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -92,6 +95,7 @@ namespace Presentation.Controllers
 
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var movie = await _movieService.GetByIdAsync(id);

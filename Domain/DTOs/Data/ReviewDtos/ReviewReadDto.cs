@@ -14,5 +14,6 @@ namespace Domain.DTOs.Data.ReviewDtos
         public required int Likes { get; init; }
         public required int MovieId { get; init; }
         public required string MadeBy { get; init; }
+        public required string AppUserId { get; init; }
     }
 }
