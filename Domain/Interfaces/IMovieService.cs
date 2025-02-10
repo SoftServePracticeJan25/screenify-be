@@ -15,6 +15,10 @@ namespace Domain.Interfaces
         Task UpdateAsync(int id, MovieCreateDto movieCreateDto);
 
         Task<MovieReadDto> PatchAsync(int id, MovieUpdateDto movieUpdateDto);
+        
+        Task<IEnumerable<MovieReadDto>> GetRecommendedMovies(int movieId);
+
+        Task<IEnumerable<MovieReadDto>> GetRecommendedMoviesForUser(AppUser user);
 
         Task<bool> DeleteAsync(int id);
     }
