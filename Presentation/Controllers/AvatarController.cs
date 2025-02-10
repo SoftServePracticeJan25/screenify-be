@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
@@ -15,12 +16,13 @@ namespace Presentation.Controllers
         }
 
         [HttpPost("upload-avatar")]
+        [Authorize]
         public async Task<IActionResult> UploadAvatar(IFormFile file)
         {
             try
             {
-                var fileUrl = await _avatarService.UploadAvatarAsync(file, User);
-                return Ok(new { avatarUrl = fileUrl });
+                var userInfo = await _avatarService.UploadAvatarAsync(file, User);
+                return Ok(userInfo);
             }
             catch (Exception ex)
             {
@@ -29,6 +31,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("get-avatar-url")]
+        [Authorize]
         public async Task<IActionResult> GetAvatar()
         {
             var avatarUrl = await _avatarService.GetAvatarUrlAsync(User);

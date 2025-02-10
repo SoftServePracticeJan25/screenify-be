@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Domain.DTOs.Account;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Domain.Interfaces
 {
     public interface IAvatarService
     {
-        Task<string> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user);
+        Task<UserInfoDto?> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user);
         Task<string?> GetAvatarUrlAsync(ClaimsPrincipal user);
     }
 

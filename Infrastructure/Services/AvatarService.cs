@@ -1,9 +1,11 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Domain.DTOs.Account;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
 
@@ -23,7 +25,7 @@ namespace Infrastructure.Services
             _userManager = userManager;
         }
 
-        public async Task<string> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user)
+        public async Task<UserInfoDto> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user)
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("File is empty.");
@@ -54,14 +56,32 @@ namespace Infrastructure.Services
 
             // Update PhotoUrl in DB
             var userEntity = await _userManager.FindByIdAsync(userId);
-            if (userEntity != null)
-            {
-                userEntity.PhotoUrl = fileUrl;
-                await _userManager.UpdateAsync(userEntity);
-            }
+            if (userEntity == null)
+                throw new Exception("User not found");
 
-            return fileUrl;
+            userEntity.PhotoUrl = fileUrl;
+            await _userManager.UpdateAsync(userEntity);
+
+            userEntity = await _userManager.Users
+            .Include(u => u.Reviews)
+            .Include(u => u.Transactions)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+            // Getting user's role
+            var role = (await _userManager.GetRolesAsync(userEntity)).FirstOrDefault();
+
+            return new UserInfoDto
+            {
+                Id = userEntity.Id,
+                Email = userEntity.Email,
+                Username = userEntity.UserName,
+                PhotoUrl = userEntity.PhotoUrl,
+                ReviewCount = userEntity.Reviews.Count,
+                TransactionCount = userEntity.Transactions.Count,
+                Role = role
+            };
         }
+
 
         public async Task<string?> GetAvatarUrlAsync(ClaimsPrincipal user)
         {
