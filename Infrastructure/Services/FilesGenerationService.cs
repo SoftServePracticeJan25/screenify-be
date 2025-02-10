@@ -32,24 +32,20 @@ namespace Infrastructure.Services
         {
             var ticketFileDto = _mapper.Map<TicketFileDto>(ticket);
 
-            // Создаем новый документ
             Document document = new Document();
             Section section = document.AddSection();
 
-            // Создаем стиль для шрифта Arial
             Style style = document.Styles.AddStyle("CourierStyle", "Normal");
             style.Font.Name = "Courier New";
             style.Font.Size = 12;
 
-            // Устанавливаем шрифт Arial для титульной строки
             Paragraph title = section.AddParagraph("Screenify\n");
-            title.Style = "CourierStyle";  // Применяем стиль Arial ко всем параграфам
+            title.Style = "CourierStyle";  
 
             title.Format.Font.Size = 14;
             title.Format.Font.Bold = true;
             title.Format.SpaceAfter = 10;
 
-            // Добавляем остальные параграфы с шрифтом Arial
             section.AddParagraph($"Movie: {ticketFileDto.Title}").Style = "CourierStyle";
             section.AddParagraph($"Room: {ticketFileDto.Name}").Style = "CourierStyle";
             section.AddParagraph($"Seat: {ticketFileDto.SeatNum}").Style = "CourierStyle";
@@ -70,24 +66,20 @@ namespace Infrastructure.Services
         {
             var transactionDto = _mapper.Map<TransactionReadDto>(transaction);
 
-            // Создаем новый документ
             Document document = new Document();
             Section section = document.AddSection();
 
-            // Создаем стиль для шрифта Arial
             Style style = document.Styles.AddStyle("CourierStyle", "Normal");
             style.Font.Name = "Courier New";
             style.Font.Size = 12;
 
-            // Устанавливаем шрифт Arial для титульной строки
             Paragraph title = section.AddParagraph("Transaction\n");
-            title.Style = "CourierStyle";  // Применяем стиль Arial ко всем параграфам
+            title.Style = "CourierStyle"; 
 
             title.Format.Font.Size = 14;
             title.Format.Font.Bold = true;
             title.Format.SpaceAfter = 10;
 
-            // Добавляем остальные параграфы с шрифтом Arial
             section.AddParagraph($"Id: {transactionDto.Id}").Style = "CourierStyle";
             section.AddParagraph($"Sum: {transactionDto.Sum}").Style = "CourierStyle";
             section.AddParagraph($"Date time: {transactionDto.CreationTime}").Style = "CourierStyle";
