@@ -1,11 +1,14 @@
+using System.Text;
 using AutoMapper;
 using Domain.DTOs.Data;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Controllers
 {
@@ -15,7 +18,9 @@ namespace Presentation.Controllers
         ITicketService ticketService,
         IMapper mapper,
         UserManager<AppUser> userManager,
-        ITransactionService transactionService) : ControllerBase
+        ITransactionService transactionService,
+        IFilesGenerationService filesGenerationService,
+        MovieDbContext context) : ControllerBase
     {
         private readonly ITicketService _ticketService = ticketService;
         private readonly IMapper _mapper = mapper;
@@ -67,7 +72,6 @@ namespace Presentation.Controllers
             var userId = _userManager.GetUserId(User);
             var transaction = await _transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
 
-
             if (transaction == null || transaction.AppUserId != userId)
             {
                 return Forbid();
@@ -82,6 +86,7 @@ namespace Presentation.Controllers
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "User,Admin")]
+        
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] TicketUpdateDto ticketUpdateDto)
         {
             if (!ModelState.IsValid)

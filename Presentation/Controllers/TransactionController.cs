@@ -12,7 +12,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/transaction")]
-    public class TransactionController(ITransactionService transactionService, IMapper mapper, UserManager<AppUser> userManager) : ControllerBase
+    public class TransactionController(ITransactionService transactionService, IMapper mapper, UserManager<AppUser> userManager, IFilesGenerationService filesGenerationService) : ControllerBase
     {
         [HttpGet]
         [Authorize(Roles="Admin")]

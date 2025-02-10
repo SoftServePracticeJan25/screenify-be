@@ -123,6 +123,21 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Ticket, TicketCreateDto>().ReverseMap();
             CreateMap<Ticket, TicketUpdateDto>().ReverseMap();
             CreateMap<Ticket, TicketReadDto>().ReverseMap();
+            CreateMap<Ticket, TicketFileDto>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Session != null && src.Session.Room != null ? src.Session.Room.Name : "Unknown"))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Session != null ? src.Session.StartTime : DateTime.MinValue))
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Session != null ? src.Session.Price : 0));
+            CreateMap<Ticket, TicketNotifDto>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => 
+                src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => 
+                src.Session != null ? src.Session.StartTime : DateTime.MinValue))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => 
+                src.Session != null && src.Session.Movie != null && src.Session.Movie.Duration > 0 
+                    ? src.Session.StartTime.AddMinutes(src.Session.Movie.Duration) 
+                    : src.Session.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
+            .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1Ф, Odesa, Odesa Oblast, 65000"));
 
             CreateMap<Room, RoomDto>();
             CreateMap<Session, SessionDto>().ReverseMap()
