@@ -221,7 +221,7 @@ namespace Infrastructure.Services
                 })
                 .OrderByDescending(m => m.MatchCount) // more matches -> higher
                 .ThenByDescending(m => m.Movie.Id) // New films -> higher (by id)
-                .Take(10) 
+                .Take(6) 
                 .Select(m => m.Movie)
                 .ToList();
 
