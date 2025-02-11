@@ -14,6 +14,7 @@ using Hangfire.SqlServer;
 using Microsoft.Extensions.DependencyInjection;
 using Services;
 using AutoMapper;
+using Azure.Storage.Blobs;
 using PdfSharp.Fonts;
 using Domain.Helpers.QueryObject;
 
@@ -126,6 +127,14 @@ namespace Presentation
         
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
+
+            builder.Services.AddSingleton(_ =>
+            {
+                var connectionString = builder.Configuration["AzureStorage:ConnectionString"];
+                return new BlobServiceClient(connectionString);
+            });
+
+            builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<IMovieService, MovieService>();
             builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddScoped<IGenreService, GenreService>();
