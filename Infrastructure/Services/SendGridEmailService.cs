@@ -36,8 +36,7 @@ namespace Infrastructure.Services
             var from = new EmailAddress(_fromEmail, _fromName);
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
-            
-            // Addinf file if file path is entered
+
             if (files.Count != 0 )
             {
                 foreach (var file in files)
@@ -64,7 +63,7 @@ namespace Infrastructure.Services
             {
                 (invoicePdf, "Invoice.pdf"),
                 (ticketPdf, "Ticket.pdf"),
-                (calendarFile, "Event.ics") // Файл календаря в формате .ics
+                (calendarFile, "Event.ics") 
             };
 
             var response = await SendEmailAsync(toEmail, subject, body, files);
