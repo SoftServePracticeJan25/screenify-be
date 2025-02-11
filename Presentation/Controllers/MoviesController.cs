@@ -98,13 +98,6 @@ namespace Presentation.Controllers
             return Ok(updatedMovie);
         }
 
-        [HttpGet("{id}/similiar")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetRecommendedMovies(int id)
-        {
-            var recommendedMovies = await _movieService.GetRecommendedMovies(id);
-            return Ok(recommendedMovies);
-        }
 
         [HttpGet("recommended")]
         [AllowAnonymous]

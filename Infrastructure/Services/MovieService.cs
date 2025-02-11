@@ -144,41 +144,6 @@ namespace Infrastructure.Services
             return _mapper.Map<MovieReadDto>(movie);
         }
 
-        public async Task<IEnumerable<MovieReadDto>> GetRecommendedMovies(int movieId)
-        {
-            var movie = await _context.Movies
-                .Include(m => m.MovieGenres)
-                    .ThenInclude(mg => mg.Genre)
-                .FirstOrDefaultAsync(m => m.Id == movieId);
-
-            if (movie == null)
-                throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
-
-            var genreIds = movie.MovieGenres.Select(mg => mg.GenreId).ToList();
-
-            var recommendedMovies = await _context.Movies
-                .Include(m => m.MovieGenres)
-                    .ThenInclude(mg => mg.Genre)
-                .Include(m => m.Sessions)
-                .Where(m => m.Id != movieId && m.MovieGenres.Any(mg => genreIds.Contains(mg.GenreId)))
-                .ToListAsync();
-
-            
-            var sortedMovies = recommendedMovies
-                .Select(m => new
-                {
-                    Movie = m,
-                    MatchCount = m.MovieGenres.Count(mg => genreIds.Contains(mg.GenreId)) 
-                })
-                .OrderByDescending(m => m.MatchCount) 
-                .ThenByDescending(m => m.Movie.Id) // New film higher than old
-                .Take(10)
-                .Select(m => m.Movie)
-                .ToList();
-
-            return _mapper.Map<IEnumerable<MovieReadDto>>(sortedMovies);
-        }
-
         public async Task<IEnumerable<MovieReadDto>> GetRecommendedMoviesForUser(AppUser appUser)
         {
             var userId = appUser.Id;
