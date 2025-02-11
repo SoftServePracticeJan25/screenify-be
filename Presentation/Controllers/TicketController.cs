@@ -1,85 +1,139 @@
+using System.Text;
 using AutoMapper;
 using Domain.DTOs.Data;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.DataAccess;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/ticket")]
-    public class TicketController(ITicketService ticketService, IMapper mapper) : ControllerBase
+    public class TicketController(
+        ITicketService ticketService,
+        IMapper mapper,
+        UserManager<AppUser> userManager,
+        ITransactionService transactionService,
+        IFilesGenerationService filesGenerationService,
+        MovieDbContext context) : ControllerBase
     {
+        private readonly ITicketService _ticketService = ticketService;
+        private readonly IMapper _mapper = mapper;
+        private readonly UserManager<AppUser> _userManager = userManager;
+        private readonly ITransactionService _transactionService = transactionService;
+
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
-            var tickets = await ticketService.GetAllAsync();
-
+            var tickets = await _ticketService.GetAllAsync();
             return Ok(tickets);
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            TicketReadDto? ticket = await ticketService.GetByIdAsync(id);
-
-            if(ticket == null)
+            var ticket = await _ticketService.GetByIdAsync(id);
+            if (ticket == null)
             {
                 return NotFound();
+            }
+
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = User.IsInRole("Admin");
+
+            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            if (transaction.AppUserId != userId && !isAdmin)
+            {
+                return Forbid(); // If not an Admin or Owner -> 403 Forbidden
             }
 
             return Ok(ticket);
         }
 
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Create([FromBody] TicketCreateDto ticketCreateDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ticket = mapper.Map<Ticket>(ticketCreateDto);
+            var userId = _userManager.GetUserId(User);
+            var transaction = await _transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
 
-            await ticketService.AddAsync(ticket);
+            if (transaction == null || transaction.AppUserId != userId)
+            {
+                return Forbid();
+            }
 
-            var ticketDto = mapper.Map<TicketReadDto>(ticket);
+            var ticket = _mapper.Map<Ticket>(ticketCreateDto);
+            await _ticketService.AddAsync(ticket);
 
+            var ticketDto = _mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
         }
 
-        [HttpPut]
-        [Route("{id:int}")]
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = "User,Admin")]
+        
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] TicketUpdateDto ticketUpdateDto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ticketModel = await ticketService.UpdateAsync(id, ticketUpdateDto);
-
-            if(ticketModel == null)
+            var ticket = await _ticketService.GetByIdAsync(id);
+            if (ticket == null)
             {
                 return NotFound();
             }
 
-            return Ok(ticketModel);
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = User.IsInRole("Admin");
+
+            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
+            {
+                return Forbid(); 
+            }
+
+            var updatedTicket = await _ticketService.UpdateAsync(id, ticketUpdateDto);
+            return Ok(updatedTicket);
         }
 
-        [HttpDelete]
-        [Route("{id:int}")]
+        [HttpDelete("{id:int}")]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ticketModel = await ticketService.DeleteAsync(id);
-
-            if(ticketModel == null)
+            var ticket = await _ticketService.GetByIdAsync(id);
+            if (ticket == null)
             {
                 return NotFound();
             }
 
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = User.IsInRole("Admin");
+
+            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
+            {
+                return Forbid(); 
+            }
+
+            await _ticketService.DeleteAsync(id);
             return NoContent();
         }
     }

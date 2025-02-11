@@ -12,6 +12,8 @@ using Microsoft.OpenApi.Models;
 using Services;
 using AutoMapper;
 using Azure.Storage.Blobs;
+using PdfSharp.Fonts;
+using Domain.Helpers.QueryObject;
 
 namespace Presentation
 {
@@ -134,6 +136,7 @@ namespace Presentation
             builder.Services.AddScoped<ITicketService, TicketService>();
             builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+            builder.Services.AddScoped<IFilesGenerationService, FilesGenerationService>();
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(MapProfile));
@@ -141,6 +144,9 @@ namespace Presentation
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())

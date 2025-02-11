@@ -16,6 +16,7 @@ using Domain.DTOs.Data.CinemaTypeDtos;
 using Domain.DTOs.Data.MovieGenresDtos;
 using Domain.DTOs.Data.SessionDtos;
 using Domain.DTOs.Account;
+using Domain.DTOs.MovieDtos;
 
 namespace Infrastructure.MappingProfiles
 {
@@ -32,6 +33,10 @@ namespace Infrastructure.MappingProfiles
             CreateMap<ActorRole, ActorRoleUpdateDto>().ReverseMap();
             CreateMap<ActorRole, ActorRoleCreateDto>().ReverseMap();
             CreateMap<ActorRole, ActorRoleReadDto>().ReverseMap();
+
+            CreateMap<MovieGenre, GenreDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.GenreId))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Genre != null ? src.Genre.Name : "Unknown"));
 
             CreateMap<Room, RoomReadDto>();
             CreateMap<RoomCreateDto, Room>();
@@ -73,13 +78,16 @@ namespace Infrastructure.MappingProfiles
                         CharacterName = actor.CharacterName
                     })));
 
+            CreateMap<MovieUpdateDto, Movie>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
             CreateMap<Movie, MovieReadDto>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
                     src.MovieGenres != null
-                        ? src.MovieGenres.Select(mg => new GenreDto
+                        ? src.MovieGenres.Select(mg => mg.Genre).Where(g => g != null).Select(g => new GenreDto
                         {
-                            Id = mg.GenreId,
-                            Name = mg.Genre != null ? mg.Genre.Name ?? "Unknown" : "Unknown"
+                            Id = g.Id,
+                            Name = g.Name
                         }).ToList()
                         : new List<GenreDto>()))
                 .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
@@ -101,12 +109,14 @@ namespace Infrastructure.MappingProfiles
                         }).ToList()
                         : new List<MovieActorReadListDto>()));
 
-            CreateMap<MovieGenre, MovieGenreDto>();
+            
             CreateMap<Review, ReviewDto>().ReverseMap();
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();
             CreateMap<Review, ReviewReadDto>()
-                .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : "Unknown"));
+            .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName ?? "Unknown" : "Unknown"))
+            .ForMember(dest => dest.AppUserId, opt => opt.MapFrom(src => src.AppUserId));
+
 
             CreateMap<Transaction, TransactionDto>().ReverseMap();
             CreateMap<Transaction, TransactionCreateDto>().ReverseMap();
@@ -117,6 +127,21 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Ticket, TicketCreateDto>().ReverseMap();
             CreateMap<Ticket, TicketUpdateDto>().ReverseMap();
             CreateMap<Ticket, TicketReadDto>().ReverseMap();
+            CreateMap<Ticket, TicketFileDto>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Session != null && src.Session.Room != null ? src.Session.Room.Name : "Unknown"))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Session != null ? src.Session.StartTime : DateTime.MinValue))
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Session != null ? src.Session.Price : 0));
+            CreateMap<Ticket, TicketNotifDto>()
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => 
+                src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => 
+                src.Session != null ? src.Session.StartTime : DateTime.MinValue))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => 
+                src.Session != null && src.Session.Movie != null && src.Session.Movie.Duration > 0 
+                    ? src.Session.StartTime.AddMinutes(src.Session.Movie.Duration) 
+                    : src.Session.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
+            .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1Ф, Odesa, Odesa Oblast, 65000"));
 
             CreateMap<Room, RoomDto>();
             CreateMap<Session, SessionDto>().ReverseMap()
@@ -133,4 +158,5 @@ namespace Infrastructure.MappingProfiles
             CreateMap<AppUser, UserInfoDto>().ReverseMap();
         }
     }
+
 }
