@@ -1,4 +1,5 @@
 ﻿using Domain.DTOs.Data.SessionDtos;
+using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,11 @@ namespace Presentation.Controllers
         {
             _sessionService = sessionService;
         }
-        [HttpGet]
+        [HttpGet("")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] SessionQueryObject query)
         {
-            var sessions = await _sessionService.GetAllAsync();
+            var sessions = await _sessionService.GetAllAsync(query);
             return Ok(sessions);
         }
 

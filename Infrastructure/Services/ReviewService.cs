@@ -50,7 +50,7 @@ namespace Infrastructure.Services
 
             var reviewList = await reviews.ToListAsync(); // Now working async
             return _mapper.Map<List<ReviewReadDto>>(reviewList);
-        }
+    }
 
     public async Task<ReviewReadDto?> GetByIdAsync(int id)
     {

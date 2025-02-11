@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Domain.DTOs.Data.SessionDtos;
 using Domain.Entities;
+using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +24,41 @@ namespace Infrastructure.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<SessionDto>> GetAllAsync()
+        public async Task<IEnumerable<SessionDto>> GetAllAsync(SessionQueryObject query)
         {
-            var sessions = await _context.Sessions.ToListAsync();
-            return _mapper.Map<IEnumerable<SessionDto>>(sessions);
+            var sessions = _context.Sessions
+            .Include(s => s.Movie)
+            .ThenInclude(m => m.MovieGenres) 
+            .AsQueryable();
+
+            if (query.StartDate.HasValue)
+            {
+                sessions = sessions.Where(s => s.StartTime.Date >= query.StartDate.Value.Date);
+            }
+
+            if (query.EndDate.HasValue)
+            {
+                sessions = sessions.Where(s => s.StartTime.Date <= query.EndDate.Value.Date);
+            }
+
+            if (query.StartTime.HasValue)
+            {
+                sessions = sessions.Where(s => s.StartTime.TimeOfDay >= query.StartTime.Value);
+            }
+
+            if (query.EndTime.HasValue)
+            {
+                sessions = sessions.Where(s => s.StartTime.TimeOfDay <= query.EndTime.Value);
+            }
+
+            if (query.GenreId.HasValue)
+            {
+                sessions = sessions.Where(s => s.Movie != null &&
+                    s.Movie.MovieGenres.Any(mg => mg.GenreId == query.GenreId.Value));
+            }
+
+            var sessionList = await sessions.ToListAsync();
+            return _mapper.Map<List<SessionDto>>(sessionList);
         }
 
         public async Task<SessionDto> GetByIdAsync(int id)
