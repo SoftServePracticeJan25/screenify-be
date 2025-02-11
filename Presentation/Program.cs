@@ -26,7 +26,7 @@ namespace Presentation
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddSwaggerGen(option =>
+            builder.Services.AddSwaggerGen(option => // Adds JWT Authorization in Swagger
             {
                 option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -55,7 +55,7 @@ namespace Presentation
             });
 
 
-            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+            builder.Services.AddControllers().AddNewtonsoftJson(options => // Blocks infinite looping in JSON
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
@@ -72,7 +72,8 @@ namespace Presentation
                 options.Password.RequireNonAlphanumeric = true;
                 options.Password.RequiredLength = 12;
             })
-            .AddEntityFrameworkStores<MovieDbContext>();
+            .AddEntityFrameworkStores<MovieDbContext>()
+            .AddDefaultTokenProviders(); // For Email Confirmation
 
             builder.Services.AddAuthentication(options =>
             {
@@ -84,7 +85,7 @@ namespace Presentation
                 options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters // JWT Settings
                 {
                     ValidateIssuer = true,
                     ValidIssuer = builder.Configuration["JWT:Issuer"],
@@ -128,7 +129,7 @@ namespace Presentation
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
 
-            builder.Services.AddSingleton(_ =>
+            builder.Services.AddSingleton(_ => // BlobService registration
             {
                 var connectionString = builder.Configuration["AzureStorage:ConnectionString"];
                 return new BlobServiceClient(connectionString);
@@ -150,6 +151,7 @@ namespace Presentation
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
             builder.Services.AddScoped<IFilesGenerationService, FilesGenerationService>();
             builder.Services.AddScoped<ISendGridEmailService, SendGridEmailService>();
+
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(MapProfile));

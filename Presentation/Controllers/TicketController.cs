@@ -89,6 +89,8 @@ namespace Presentation.Controllers
                 return BadRequest("User email not found.");
             }
 
+            if (!user.EmailConfirmed) return BadRequest("Confirm email first");
+
             await emailService.SendTransactionEventTicketEmail(ticket, _mapper.Map<Transaction>(transactionDto), user.Email);
 
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);

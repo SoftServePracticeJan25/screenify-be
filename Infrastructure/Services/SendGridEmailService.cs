@@ -37,7 +37,7 @@ namespace Infrastructure.Services
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
 
-            if (files.Count != 0 )
+            if ( files != null && files.Count != 0 )
             {
                 foreach (var file in files)
                 {
@@ -69,5 +69,14 @@ namespace Infrastructure.Services
             var response = await SendEmailAsync(toEmail, subject, body, files);
             return response;
         }
+
+        public async Task<Response> SendEmailConfirmationAsync(string toEmail, string confirmationLink)
+        {
+            string subject = "Confirm your email";
+            string body = $"Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.";
+
+            return await SendEmailAsync(toEmail, subject, body, null);
+        }
+
     }
 }
