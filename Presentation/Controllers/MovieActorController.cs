@@ -12,7 +12,7 @@ namespace Presentation.Controllers
     public class MovieActorController(IMovieActorService movieActorService, IMapper mapper) : ControllerBase
     {
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var actors = await movieActorService.GetAllAsync();
@@ -21,6 +21,7 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("{movieId:int}/{actorId:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById([FromRoute] int movieId, [FromRoute] int actorId)
         {
             var movieActor = await movieActorService.GetByIdAsync(movieId, actorId);
@@ -34,6 +35,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] MovieActorCreateDto movieActorCreateDto)
         {
             if (!ModelState.IsValid)
@@ -49,6 +51,7 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{movieId:int}/{actorId:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update([FromRoute] int movieId, [FromRoute] int actorId, [FromBody] MovieActorUpdateDto movieActorUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -66,6 +69,7 @@ namespace Presentation.Controllers
 
 
         [HttpDelete("{movieId:int}/{actorId:int}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete([FromRoute] int movieId, [FromRoute] int actorId)
         {
             if (!ModelState.IsValid)

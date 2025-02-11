@@ -9,9 +9,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Hangfire;
+using Hangfire.SqlServer;
+using Microsoft.Extensions.DependencyInjection;
 using Services;
-using Infrastructure.MappingProfiles;
 using AutoMapper;
+using Azure.Storage.Blobs;
+using PdfSharp.Fonts;
+using Domain.Helpers.QueryObject;
 
 namespace Presentation
 {
@@ -111,8 +116,25 @@ namespace Presentation
                 };
             });
 
+            // Configurating Hangfire with SQL server
+            builder.Services.AddHangfire(config =>
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(builder.Configuration["HangfireConnection"]));
+
+            builder.Services.AddHangfireServer();
+        
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
+
+            builder.Services.AddSingleton(_ =>
+            {
+                var connectionString = builder.Configuration["AzureStorage:ConnectionString"];
+                return new BlobServiceClient(connectionString);
+            });
+
+            builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<IMovieService, MovieService>();
             builder.Services.AddScoped<IRoomService, RoomService>();
             builder.Services.AddScoped<IGenreService, GenreService>();
@@ -126,6 +148,8 @@ namespace Presentation
             builder.Services.AddScoped<ITicketService, TicketService>();
             builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+            builder.Services.AddScoped<IFilesGenerationService, FilesGenerationService>();
+            builder.Services.AddScoped<ISendGridEmailService, SendGridEmailService>();
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(MapProfile));
@@ -133,6 +157,9 @@ namespace Presentation
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+            GlobalFontSettings.UseWindowsFontsUnderWindows = true;
+            
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -140,6 +167,10 @@ namespace Presentation
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Enabling controll panel of Hangfire
+            app.UseHangfireDashboard();
+            app.MapHangfireDashboard();
 
             app.UseHttpsRedirection();
 

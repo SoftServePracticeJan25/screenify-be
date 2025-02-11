@@ -9,6 +9,6 @@ namespace Domain.DTOs.Data.MovieActorDtos
         public int MovieId { get; set; } 
         public int ActorId { get; set; }
         public required int ActorRoleId { get; init; }
-        public string CharacterName { get; set; }
+        public string? CharacterName { get; set; }
     }
 }

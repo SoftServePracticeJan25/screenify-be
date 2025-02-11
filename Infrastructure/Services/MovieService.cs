@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Domain.DTOs.Api;
+using Domain.DTOs.MovieDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
@@ -10,11 +12,13 @@ namespace Infrastructure.Services
     public class MovieService : IMovieService
     {
         private readonly MovieDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
         private readonly IMapper _mapper;
 
-        public MovieService(MovieDbContext context, IMapper mapper)
+        public MovieService(MovieDbContext context, IMapper mapper,UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -48,11 +52,15 @@ namespace Infrastructure.Services
 
         public async Task<MovieReadDto> AddAsync(MovieCreateDto movieCreateDto)
         {
+            if (movieCreateDto.GenreIds == null || !movieCreateDto.GenreIds.Any())
+                throw new ArgumentNullException(nameof(movieCreateDto.GenreIds), "GenreIds cannot be null or empty.");
+
             var movie = _mapper.Map<Movie>(movieCreateDto);
 
             var genres = await _context.Genres
                 .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
                 .ToListAsync();
+
             movie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
 
             _context.Movies.Add(movie);
@@ -64,13 +72,16 @@ namespace Infrastructure.Services
                 .Include(m => m.MovieActors).ThenInclude(ma => ma.ActorRole)
                 .FirstOrDefaultAsync(m => m.Id == movie.Id);
 
+            if (savedMovie == null)
+                throw new Exception("Failed to retrieve the saved movie.");
+
             return _mapper.Map<MovieReadDto>(savedMovie);
         }
 
         public async Task UpdateAsync(int id, MovieCreateDto movieCreateDto)
         {
             var existingMovie = await _context.Movies
-                .Include(m => m.MovieGenres)
+                .Include(m => m.MovieGenres) 
                 .Include(m => m.MovieActors)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
@@ -79,18 +90,109 @@ namespace Infrastructure.Services
 
             _mapper.Map(movieCreateDto, existingMovie);
 
-            _context.MovieGenres.RemoveRange(existingMovie.MovieGenres);
-            var genres = await _context.Genres
-                .Where(g => movieCreateDto.GenreIds.Contains(g.Id))
-                .ToListAsync();
-            existingMovie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+            if (movieCreateDto.GenreIds == null)
+                throw new ArgumentNullException(nameof(movieCreateDto.GenreIds), "GenreIds cannot be null.");
 
-            _context.MovieActors.RemoveRange(existingMovie.MovieActors);
+
+            var movieGenresToRemove = await _context.MovieGenres
+                .Where(mg => mg.MovieId == existingMovie.Id)
+                .ToListAsync();
+
+            _context.MovieGenres.RemoveRange(movieGenresToRemove);
+            await _context.SaveChangesAsync(); 
+
+            existingMovie.MovieGenres = movieCreateDto.GenreIds
+                .Select(genreId => new MovieGenre { MovieId = existingMovie.Id, GenreId = genreId })
+                .ToList();
+
+            if (movieCreateDto.Actors == null)
+                throw new ArgumentNullException(nameof(movieCreateDto.Actors), "Actors list cannot be null.");
+
             existingMovie.MovieActors = _mapper.Map<List<MovieActor>>(movieCreateDto.Actors);
 
             await _context.SaveChangesAsync();
         }
-  
+
+        public async Task<MovieReadDto> PatchAsync(int id, MovieUpdateDto movieUpdateDto)
+        {
+            var movie = await _context.Movies
+                .Include(m => m.MovieGenres)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (movie == null)
+                throw new KeyNotFoundException($"Movie with ID {id} not found.");
+
+            if (!string.IsNullOrEmpty(movieUpdateDto.Title))
+                movie.Title = movieUpdateDto.Title;
+
+            if (movieUpdateDto.Duration.HasValue)
+                movie.Duration = movieUpdateDto.Duration.Value;
+
+            if (!string.IsNullOrEmpty(movieUpdateDto.PosterUrl))
+                movie.PosterUrl = movieUpdateDto.PosterUrl;
+
+            if (movieUpdateDto.GenreIds != null)
+            {
+                var genres = await _context.Genres
+                    .Where(g => movieUpdateDto.GenreIds.Contains(g.Id))
+                    .ToListAsync();
+
+                movie.MovieGenres = genres.Select(g => new MovieGenre { GenreId = g.Id }).ToList();
+            }
+
+            await _context.SaveChangesAsync();
+            return _mapper.Map<MovieReadDto>(movie);
+        }
+
+        public async Task<IEnumerable<MovieReadDto>> GetRecommendedMoviesForUser(AppUser appUser)
+        {
+            var userId = appUser.Id;
+ 
+            var purchasedMovies = await _context.Transactions
+                .Where(t => t.AppUserId == userId)
+                .SelectMany(t => t.Tickets.Select(ticket => ticket.Session.Movie))
+                .Include(m => m.MovieGenres)
+                    .ThenInclude(mg => mg.Genre)
+                .Distinct()
+                .ToListAsync();
+
+            if (!purchasedMovies.Any())
+            {
+                return new List<MovieReadDto>(); 
+            }
+
+            // collect all genres
+            var genreIds = purchasedMovies
+                .SelectMany(m => m.MovieGenres.Select(mg => mg.GenreId))
+                .Distinct()
+                .ToList();
+
+            var recommendedMovies = await _context.Movies
+                .Include(m => m.MovieGenres)
+                    .ThenInclude(mg => mg.Genre)
+                .Where(m => m.MovieGenres.Any(mg => genreIds.Contains(mg.GenreId)) && !purchasedMovies.Contains(m))
+                .ToListAsync();
+
+            if (!recommendedMovies.Any())
+            {
+                return new List<MovieReadDto>(); 
+            }
+
+            var sortedMovies = recommendedMovies
+                .Select(m => new
+                {
+                    Movie = m,
+                    MatchCount = m.MovieGenres.Count(mg => genreIds.Contains(mg.GenreId))
+                })
+                .OrderByDescending(m => m.MatchCount) // more matches -> higher
+                .ThenByDescending(m => m.Movie.Id) // New films -> higher (by id)
+                .Take(6) 
+                .Select(m => m.Movie)
+                .ToList();
+
+            return _mapper.Map<IEnumerable<MovieReadDto>>(sortedMovies);
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var sessions = await _context.Sessions.Where(s => s.MovieId == id).ToListAsync();
