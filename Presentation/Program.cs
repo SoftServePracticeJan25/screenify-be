@@ -148,6 +148,7 @@ namespace Presentation
             builder.Services.AddScoped<ITicketService, TicketService>();
             builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
+            builder.Services.AddScoped<IStatisticService, StatisticService>();
             builder.Services.AddScoped<IFilesGenerationService, FilesGenerationService>();
             builder.Services.AddScoped<ISendGridEmailService, SendGridEmailService>();
             builder.Services.AddControllers();
