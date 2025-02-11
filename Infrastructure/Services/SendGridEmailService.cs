@@ -23,12 +23,17 @@ namespace Infrastructure.Services
         private readonly IFilesGenerationService _filesGenerationService;
         public SendGridEmailService(IConfiguration configuration, IFilesGenerationService filesGenerationService)
         {
-            _apiKey = configuration["SendGrid:ApiKey"];
-            _fromEmail = configuration["SendGrid:FromEmail"];
-            _fromName = configuration["SendGrid:FromName"];
+            _apiKey = configuration["SendGrid:ApiKey"]
+                ?? throw new ArgumentNullException(nameof(_apiKey), "SendGrid API key is missing in configuration.");
 
-            _filesGenerationService = filesGenerationService;
+            _fromEmail = configuration["SendGrid:FromEmail"]
+                ?? throw new ArgumentNullException(nameof(_fromEmail), "SendGrid FromEmail is missing in configuration.");
+
+            _fromName = configuration["SendGrid:FromName"] ?? "Screenify-reply"; 
+
+            _filesGenerationService = filesGenerationService ?? throw new ArgumentNullException(nameof(filesGenerationService));
         }
+
 
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, List<(byte[] FileData, string FileName)>? files)
         {
