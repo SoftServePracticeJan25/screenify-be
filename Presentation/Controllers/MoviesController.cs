@@ -4,6 +4,9 @@ using Domain.DTOs.MovieDtos;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Infrastructure.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Presentation.Controllers
 {
@@ -12,10 +15,12 @@ namespace Presentation.Controllers
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
+        private readonly MovieDbContext _context;
 
-        public MoviesController(IMovieService movieService)
+        public MoviesController(IMovieService movieService, MovieDbContext context)
         {
             _movieService = movieService;
+            _context = context;
         }
 
         [HttpGet]
@@ -91,6 +96,23 @@ namespace Presentation.Controllers
 
             var updatedMovie = await _movieService.PatchAsync(id, movieUpdateDto);
             return Ok(updatedMovie);
+        }
+
+
+        [HttpGet("recommended")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRecommendedMoviesForUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Ok(new List<MovieReadDto>()); // empty []
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return Ok(new List<MovieReadDto>()); // empty []
+
+            var recommendedMovies = await _movieService.GetRecommendedMoviesForUser(user);
+            return Ok(recommendedMovies);
         }
 
 

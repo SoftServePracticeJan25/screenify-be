@@ -34,6 +34,10 @@ namespace Infrastructure.MappingProfiles
             CreateMap<ActorRole, ActorRoleCreateDto>().ReverseMap();
             CreateMap<ActorRole, ActorRoleReadDto>().ReverseMap();
 
+            CreateMap<MovieGenre, GenreDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.GenreId))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Genre != null ? src.Genre.Name : "Unknown"));
+
             CreateMap<Room, RoomReadDto>();
             CreateMap<RoomCreateDto, Room>();
             CreateMap<CinemaType, CinemaTypeDto>();
@@ -80,10 +84,10 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Movie, MovieReadDto>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
                     src.MovieGenres != null
-                        ? src.MovieGenres.Select(mg => new GenreDto
+                        ? src.MovieGenres.Select(mg => mg.Genre).Where(g => g != null).Select(g => new GenreDto
                         {
-                            Id = mg.GenreId,
-                            Name = mg.Genre != null ? mg.Genre.Name ?? "Unknown" : "Unknown"
+                            Id = g.Id,
+                            Name = g.Name
                         }).ToList()
                         : new List<GenreDto>()))
                 .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
@@ -105,7 +109,7 @@ namespace Infrastructure.MappingProfiles
                         }).ToList()
                         : new List<MovieActorReadListDto>()));
 
-            CreateMap<MovieGenre, MovieGenreDto>();
+            
             CreateMap<Review, ReviewDto>().ReverseMap();
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();

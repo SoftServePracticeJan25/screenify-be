@@ -4,6 +4,7 @@ using Domain.DTOs.MovieDtos;
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
@@ -11,11 +12,13 @@ namespace Infrastructure.Services
     public class MovieService : IMovieService
     {
         private readonly MovieDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
         private readonly IMapper _mapper;
 
-        public MovieService(MovieDbContext context, IMapper mapper)
+        public MovieService(MovieDbContext context, IMapper mapper,UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -141,6 +144,54 @@ namespace Infrastructure.Services
             return _mapper.Map<MovieReadDto>(movie);
         }
 
+        public async Task<IEnumerable<MovieReadDto>> GetRecommendedMoviesForUser(AppUser appUser)
+        {
+            var userId = appUser.Id;
+ 
+            var purchasedMovies = await _context.Transactions
+                .Where(t => t.AppUserId == userId)
+                .SelectMany(t => t.Tickets.Select(ticket => ticket.Session.Movie))
+                .Include(m => m.MovieGenres)
+                    .ThenInclude(mg => mg.Genre)
+                .Distinct()
+                .ToListAsync();
+
+            if (!purchasedMovies.Any())
+            {
+                return new List<MovieReadDto>(); 
+            }
+
+            // collect all genres
+            var genreIds = purchasedMovies
+                .SelectMany(m => m.MovieGenres.Select(mg => mg.GenreId))
+                .Distinct()
+                .ToList();
+
+            var recommendedMovies = await _context.Movies
+                .Include(m => m.MovieGenres)
+                    .ThenInclude(mg => mg.Genre)
+                .Where(m => m.MovieGenres.Any(mg => genreIds.Contains(mg.GenreId)) && !purchasedMovies.Contains(m))
+                .ToListAsync();
+
+            if (!recommendedMovies.Any())
+            {
+                return new List<MovieReadDto>(); 
+            }
+
+            var sortedMovies = recommendedMovies
+                .Select(m => new
+                {
+                    Movie = m,
+                    MatchCount = m.MovieGenres.Count(mg => genreIds.Contains(mg.GenreId))
+                })
+                .OrderByDescending(m => m.MatchCount) // more matches -> higher
+                .ThenByDescending(m => m.Movie.Id) // New films -> higher (by id)
+                .Take(6) 
+                .Select(m => m.Movie)
+                .ToList();
+
+            return _mapper.Map<IEnumerable<MovieReadDto>>(sortedMovies);
+        }
 
         public async Task<bool> DeleteAsync(int id)
         {
