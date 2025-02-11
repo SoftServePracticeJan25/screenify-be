@@ -16,7 +16,7 @@ namespace Presentation.Controllers
         {
             _sessionService = sessionService;
         }
-        [HttpGet("")]
+        [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] SessionQueryObject query)
         {
