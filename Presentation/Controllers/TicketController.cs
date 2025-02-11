@@ -99,6 +99,8 @@ namespace Presentation.Controllers
                         ));
 
 
+            //if (!user.EmailConfirmed) return BadRequest("Confirm email first");
+
 
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);

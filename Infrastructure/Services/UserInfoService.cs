@@ -47,7 +47,8 @@ namespace Infrastructure.Services
                 PhotoUrl = user.PhotoUrl, 
                 ReviewCount = user.Reviews.Count, 
                 TransactionCount = user.Transactions.Count,
-                Role = role
+                Role = role,
+                EmailConfirmed = user.EmailConfirmed
             };
         }
     }
