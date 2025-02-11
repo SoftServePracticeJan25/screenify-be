@@ -15,7 +15,9 @@ namespace Presentation.Controllers
         UserManager<AppUser> userManager,
         ITokenService tokenService,
         IUserInfoService userInfoService,
-        SignInManager<AppUser> signInManager)
+        SignInManager<AppUser> signInManager,
+        ISendGridEmailService emailService,
+        IConfiguration configuration)
         : ControllerBase
     {
         [HttpPost("login")]
@@ -89,6 +91,13 @@ namespace Presentation.Controllers
                 return BadRequest(new ValidationProblemDetails(errors));
             }
 
+            var token = await userManager.GenerateUserTokenAsync(appUser, TokenOptions.DefaultProvider, "EmailConfirmation");
+            Console.WriteLine(token);
+            var confirmationLink = $"{configuration["BaseUrl"]}/api/account/confirm-email?userId={appUser.Id}&token={Uri.EscapeDataString(token)}";
+
+            // Sending confirmation email
+            await emailService.SendEmailConfirmationAsync(appUser.Email, confirmationLink);
+
             var roles = await userManager.GetRolesAsync(appUser); 
 
             return Ok(new NewUserDto
@@ -136,7 +145,6 @@ namespace Presentation.Controllers
             });
         }
 
-
         [HttpGet("user-info")]
         [Authorize]
         public async Task<IActionResult> GetUserInfo()
@@ -150,7 +158,20 @@ namespace Presentation.Controllers
 
             UserInfoDto userInfo = await userInfoService.GetUserInfo(appUser);
 
-                return Ok(userInfo);
+            return Ok(userInfo);
         }
+
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null) return BadRequest("Invalid user.");
+
+            var result = await userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded) return BadRequest("Email confirmation failed.");
+
+            return Ok("Email confirmed successfully!");
+        }
+
     }
 }
