@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Hangfire;
-using Hangfire.SqlServer;
+using Hangfire.MySql;
 using Microsoft.Extensions.DependencyInjection;
 using Services;
 using AutoMapper;
@@ -118,13 +118,16 @@ namespace Presentation
 
             // Configurating Hangfire with SQL server
             builder.Services.AddHangfire(config =>
-                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                    .UseSimpleAssemblyNameTypeSerializer()
-                    .UseRecommendedSerializerSettings()
-                    .UseSqlServerStorage(builder.Configuration["HangfireConnection"]));
+    config.UseStorage(new MySqlStorage(
+        builder.Configuration["HangfireConnection"],
+        new MySqlStorageOptions
+        {
+            TablesPrefix = "Hangfire_", 
+            QueuePollInterval = TimeSpan.FromSeconds(15) 
+        })));
 
             builder.Services.AddHangfireServer();
-        
+
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
 

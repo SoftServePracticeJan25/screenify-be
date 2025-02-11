@@ -1,14 +1,12 @@
-using System.Text;
 using AutoMapper;
-using Domain.DTOs.Data;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
 using Domain.Interfaces;
+using Hangfire;
 using Infrastructure.DataAccess;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Presentation.Controllers
 {
@@ -88,8 +86,19 @@ namespace Presentation.Controllers
             {
                 return BadRequest("User email not found.");
             }
+            BackgroundJob.Enqueue<ISendGridEmailService>(emailService =>
+                 emailService.SendTransactionEventTicketEmail(
+                     new Ticket { Id = ticket.Id },
+                     new Transaction
+                     {
+                         Id = transactionDto.Id,
+                         Sum = transactionDto.Sum,
+                         CreationTime = transactionDto.CreationTime
+                     },
+                         user.Email
+                        ));
 
-            await emailService.SendTransactionEventTicketEmail(ticket, _mapper.Map<Transaction>(transactionDto), user.Email);
+
 
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
@@ -97,7 +106,7 @@ namespace Presentation.Controllers
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "User,Admin")]
-        
+
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] TicketUpdateDto ticketUpdateDto)
         {
             if (!ModelState.IsValid)
@@ -115,7 +124,7 @@ namespace Presentation.Controllers
             var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
             if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
             {
-                return Forbid(); 
+                return Forbid();
             }
 
             var updatedTicket = await _ticketService.UpdateAsync(id, ticketUpdateDto);
@@ -141,7 +150,7 @@ namespace Presentation.Controllers
             var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
             if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
             {
-                return Forbid(); 
+                return Forbid();
             }
 
             await _ticketService.DeleteAsync(id);
