@@ -20,6 +20,7 @@ namespace Presentation.Controllers
         UserManager<AppUser> userManager,
         ITransactionService transactionService,
         IFilesGenerationService filesGenerationService,
+        ISendGridEmailService emailService,
         MovieDbContext context) : ControllerBase
     {
         private readonly ITicketService _ticketService = ticketService;
@@ -70,15 +71,25 @@ namespace Presentation.Controllers
                 return BadRequest(ModelState);
 
             var userId = _userManager.GetUserId(User);
-            var transaction = await _transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
+            var transactionDto = await _transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
 
-            if (transaction == null || transaction.AppUserId != userId)
+            if (transactionDto == null || transactionDto.AppUserId != userId)
             {
                 return Forbid();
             }
 
             var ticket = _mapper.Map<Ticket>(ticketCreateDto);
             await _ticketService.AddAsync(ticket);
+
+            // Sending email to user with needed files
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null || string.IsNullOrEmpty(user.Email))
+            {
+                return BadRequest("User email not found.");
+            }
+
+            await emailService.SendTransactionEventTicketEmail(ticket, _mapper.Map<Transaction>(transactionDto), user.Email);
 
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
