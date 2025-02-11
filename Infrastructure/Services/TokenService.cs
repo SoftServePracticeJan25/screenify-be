@@ -39,7 +39,8 @@ namespace Infrastructure.Services
             {
                 new Claim(JwtRegisteredClaimNames.Email, email),
                 new Claim(JwtRegisteredClaimNames.GivenName, userName),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id) // Added userId in JWT TOKEN
+                new Claim(JwtRegisteredClaimNames.NameId, user.Id)
+
             };
             
             foreach (var role in roles)
