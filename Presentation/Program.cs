@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Hangfire;
+using Hangfire.SqlServer;
+using Microsoft.Extensions.DependencyInjection;
 using Services;
 using AutoMapper;
 using Azure.Storage.Blobs;
@@ -113,6 +116,15 @@ namespace Presentation
                 };
             });
 
+            // Configurating Hangfire with SQL server
+            builder.Services.AddHangfire(config =>
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(builder.Configuration["HangfireConnection"]));
+
+            builder.Services.AddHangfireServer();
+        
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
 
@@ -137,6 +149,7 @@ namespace Presentation
             builder.Services.AddScoped<ICinemaTypeService, CinemaTypeService>();
             builder.Services.AddScoped<IUserInfoService, UserInfoService>();
             builder.Services.AddScoped<IFilesGenerationService, FilesGenerationService>();
+            builder.Services.AddScoped<ISendGridEmailService, SendGridEmailService>();
             builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(MapProfile));
@@ -154,6 +167,10 @@ namespace Presentation
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            // Enabling controll panel of Hangfire
+            app.UseHangfireDashboard();
+            app.MapHangfireDashboard();
 
             app.UseHttpsRedirection();
 

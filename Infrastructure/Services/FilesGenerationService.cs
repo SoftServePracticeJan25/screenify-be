@@ -15,6 +15,7 @@ using AutoMapper;
 using Domain.DTOs.Data.TransactionDtos;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
 {
@@ -28,6 +29,23 @@ namespace Infrastructure.Services
             _context = context;
             _mapper = mapper;
         }
+        public async Task<byte[]> GenerateTicketPdfAsync(int ticketId)
+        {
+            var ticket = await _context.Tickets
+                .Include(t => t.Session)  
+                .ThenInclude(s => s.Movie)  
+                .Include(t => t.Session)   
+                .ThenInclude(s => s.Room)  
+                .FirstOrDefaultAsync(t => t.Id == ticketId);
+
+            if (ticket == null)
+            {
+                throw new Exception("Ticket not found.");
+            }
+
+            return GenerateTicketPdf(ticket);
+        }
+
         public byte[] GenerateTicketPdf(Ticket ticket)
         {
             var ticketFileDto = _mapper.Map<TicketFileDto>(ticket);
@@ -62,6 +80,7 @@ namespace Infrastructure.Services
                 return memoryStream.ToArray();
             }
         }
+
         public byte[] GenerateInvoice(Transaction transaction)
         {
             var transactionDto = _mapper.Map<TransactionReadDto>(transaction);
@@ -95,7 +114,7 @@ namespace Infrastructure.Services
             }
         }
 
-        public string GenerateCalendarEvent(Ticket ticket)
+        public byte[] GenerateCalendarEvent(Ticket ticket)
         {
             var ticketNotifDto = _mapper.Map<TicketNotifDto>(ticket);
 
@@ -116,7 +135,7 @@ namespace Infrastructure.Services
             sb.AppendLine("END:VEVENT");
             sb.AppendLine("END:VCALENDAR");
 
-            return sb.ToString();
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
     }
 }
