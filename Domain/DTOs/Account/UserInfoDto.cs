@@ -17,7 +17,7 @@ namespace Domain.DTOs.Account
         [Required]
         public required int TransactionCount { get; init; }
         [Required]
-        public required string Role { get; init; }
+        public required List<string> Role { get; init; } = new List<string>();
         [Required]
         public required bool EmailConfirmed { get; init; }
     }

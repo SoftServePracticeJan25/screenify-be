@@ -39,7 +39,13 @@ namespace Infrastructure.Services
 
         public async Task<List<TicketReadDto>> GetAllAsync()
         {
-            var tickets = await _context.Tickets.ToListAsync();
+            var tickets = await _context.Tickets
+                .Include(t => t.Transaction)
+                    .ThenInclude(transaction => transaction.AppUser) // Добавляем AppUser для получения userId
+                .Include(t => t.Session)
+                    .ThenInclude(s => s.Movie)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s.Room).ToListAsync();
             var ticketDtos = tickets.Select(x => _mapper.Map<TicketReadDto>(x)).ToList();
 
             return ticketDtos;
@@ -47,7 +53,15 @@ namespace Infrastructure.Services
 
         public async Task<TicketReadDto?> GetByIdAsync(int id)
         {
-            var ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+            var ticket = await _context.Tickets
+                .Include(t => t.Transaction)
+                    .ThenInclude(transaction => transaction.AppUser) // Добавляем AppUser для получения userId
+                .Include(t => t.Session)
+                    .ThenInclude(s => s.Movie)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s.Room)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);
 
             return ticketDto;
