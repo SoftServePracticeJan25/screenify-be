@@ -41,7 +41,7 @@ namespace Infrastructure.Services
         {
             var tickets = await _context.Tickets
                 .Include(t => t.Transaction)
-                    .ThenInclude(transaction => transaction.AppUser) // Добавляем AppUser для получения userId
+                    .ThenInclude(transaction => transaction.AppUser)
                 .Include(t => t.Session)
                     .ThenInclude(s => s.Movie)
                 .Include(t => t.Session)
@@ -55,7 +55,7 @@ namespace Infrastructure.Services
         {
             var ticket = await _context.Tickets
                 .Include(t => t.Transaction)
-                    .ThenInclude(transaction => transaction.AppUser) // Добавляем AppUser для получения userId
+                    .ThenInclude(transaction => transaction.AppUser)
                 .Include(t => t.Session)
                     .ThenInclude(s => s.Movie)
                 .Include(t => t.Session)
