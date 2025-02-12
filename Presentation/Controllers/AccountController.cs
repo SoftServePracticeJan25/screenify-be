@@ -173,7 +173,7 @@ namespace Presentation.Controllers
 
             return Ok("Email confirmed successfully!");
         }
-
+        
         [HttpPost("change-password")]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
@@ -209,7 +209,57 @@ namespace Presentation.Controllers
 
             return Ok(new { message = "Password changed successfully." });
         }
+        
+        [HttpPost("change-username")]
+        [Authorize]
+        public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameDto changeUsernameDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ValidationProblemDetails(ModelState));
 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("Invalid token. No user ID found.");
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return Unauthorized(new { message = "User not found." });
+
+            // New login must be free
+            var existingUser = await userManager.FindByNameAsync(changeUsernameDto.NewUsername);
+            if (existingUser != null)
+            {
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "NewUsername", new[] { "This username is already taken." } } }));
+            }
+
+            // New login must not be the same as old one
+            if (user.UserName == changeUsernameDto.NewUsername)
+            {
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+                { { "NewUsername", new[] { "New username must be different from the current username." } } }));
+            }
+
+            var setUsernameResult = await userManager.SetUserNameAsync(user, changeUsernameDto.NewUsername);
+            if (!setUsernameResult.Succeeded)
+            {
+                var errors = setUsernameResult.Errors.ToDictionary(e => e.Code, e => new[] { e.Description });
+                return BadRequest(new ValidationProblemDetails(errors));
+            }
+
+            // Generating new tokens
+            var roles = await userManager.GetRolesAsync(user);
+            user.RefreshToken = tokenService.CreateRefreshToken();
+            user.RefreshTokenExpiryDate = DateTime.UtcNow.AddDays(30);
+            await userManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                NewUsername = user.UserName,
+                AccessToken = tokenService.CreateAccessToken(user, roles.ToList()),
+                RefreshToken = user.RefreshToken
+            });
+        }
 
     }
 }
