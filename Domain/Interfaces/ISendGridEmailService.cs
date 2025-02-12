@@ -18,5 +18,6 @@ namespace Domain.Interfaces
     {
         public Task<Response> SendEmailAsync(string toEmail, string subject, string body, List<(byte[] FileData, string FileName)> files);
         public Task<Response> SendTransactionEventTicketEmail(Ticket ticket, Transaction transaction, string toEmail);
+        public Task<Response> SendEmailConfirmationAsync(string toEmail, string confirmationLink);
     }
 }

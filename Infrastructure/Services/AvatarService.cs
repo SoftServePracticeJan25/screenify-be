@@ -78,7 +78,8 @@ namespace Infrastructure.Services
                 PhotoUrl = userEntity.PhotoUrl,
                 ReviewCount = userEntity.Reviews.Count,
                 TransactionCount = userEntity.Transactions.Count,
-                Role = role
+                Role = role,
+                EmailConfirmed = userEntity.EmailConfirmed
             };
         }
 

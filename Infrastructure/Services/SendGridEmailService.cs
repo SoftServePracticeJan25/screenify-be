@@ -23,12 +23,17 @@ namespace Infrastructure.Services
         private readonly IFilesGenerationService _filesGenerationService;
         public SendGridEmailService(IConfiguration configuration, IFilesGenerationService filesGenerationService)
         {
-            _apiKey = configuration["SendGrid:ApiKey"];
-            _fromEmail = configuration["SendGrid:FromEmail"];
-            _fromName = configuration["SendGrid:FromName"];
+            _apiKey = configuration["SendGrid:ApiKey"]
+                ?? throw new ArgumentNullException(nameof(_apiKey), "SendGrid API key is missing in configuration.");
 
-            _filesGenerationService = filesGenerationService;
+            _fromEmail = configuration["SendGrid:FromEmail"]
+                ?? throw new ArgumentNullException(nameof(_fromEmail), "SendGrid FromEmail is missing in configuration.");
+
+            _fromName = configuration["SendGrid:FromName"] ?? "Screenify-reply"; 
+
+            _filesGenerationService = filesGenerationService ?? throw new ArgumentNullException(nameof(filesGenerationService));
         }
+
 
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, List<(byte[] FileData, string FileName)>? files)
         {
@@ -37,7 +42,7 @@ namespace Infrastructure.Services
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
 
-            if (files.Count != 0 )
+            if ( files != null && files.Count != 0 )
             {
                 foreach (var file in files)
                 {
@@ -69,5 +74,14 @@ namespace Infrastructure.Services
             var response = await SendEmailAsync(toEmail, subject, body, files);
             return response;
         }
+
+        public async Task<Response> SendEmailConfirmationAsync(string toEmail, string confirmationLink)
+        {
+            string subject = "Confirm your email";
+            string body = $"Please confirm your email by clicking <a href='{confirmationLink}'>here</a>.";
+
+            return await SendEmailAsync(toEmail, subject, body, null);
+        }
+
     }
 }
