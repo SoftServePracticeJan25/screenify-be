@@ -173,7 +173,43 @@ namespace Presentation.Controllers
 
             return Ok("Email confirmed successfully!");
         }
+        
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ValidationProblemDetails(ModelState));
 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { error = "Invalid token. No user ID found." });
+
+            var user = await userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound(new { error = "User not found." });
+
+            // Validating new password
+            var passwordValidator = new PasswordValidator<AppUser>();
+            var passwordResult = await passwordValidator.ValidateAsync(userManager, user, changePasswordDto.NewPassword);
+
+            if (!passwordResult.Succeeded)
+            {
+                var errors = passwordResult.Errors.Select(e => e.Description).ToList();
+                return BadRequest(new { errors });
+            }
+
+            var changePasswordResult = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
+
+            if (!changePasswordResult.Succeeded)
+            {
+                var errors = changePasswordResult.Errors.Select(e => e.Description).ToList();
+                return BadRequest(new { errors });
+            }
+
+            return Ok(new { message = "Password changed successfully." });
+        }
+        
         [HttpPost("change-username")]
         [Authorize]
         public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameDto changeUsernameDto)
@@ -224,7 +260,6 @@ namespace Presentation.Controllers
                 RefreshToken = user.RefreshToken
             });
         }
-
 
     }
 }
