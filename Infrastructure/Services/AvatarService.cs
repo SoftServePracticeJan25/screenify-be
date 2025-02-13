@@ -41,8 +41,8 @@ namespace Infrastructure.Services
             if (string.IsNullOrEmpty(userId))
                 throw new UnauthorizedAccessException("Invalid token. No user ID found.");
 
-            var fileName = $"{userId}{fileExtension}";
-
+            //var fileName = $"{userId}{fileExtension}";
+            var fileName = $"{Guid.NewGuid()}{fileExtension}";
             var blobContainer = _blobServiceClient.GetBlobContainerClient(_containerName);
             var blobClient = blobContainer.GetBlobClient(fileName);
 
@@ -58,6 +58,13 @@ namespace Infrastructure.Services
             var userEntity = await _userManager.FindByIdAsync(userId);
             if (userEntity == null)
                 throw new Exception("User not found");
+
+            if (!string.IsNullOrEmpty(userEntity.PhotoUrl))
+            {
+                var oldBlobName = Path.GetFileName(new Uri(userEntity.PhotoUrl).LocalPath);
+                var oldBlobClient = _blobServiceClient.GetBlobContainerClient(_containerName).GetBlobClient(oldBlobName);
+                await oldBlobClient.DeleteIfExistsAsync();
+            }
 
             userEntity.PhotoUrl = fileUrl;
             await _userManager.UpdateAsync(userEntity);
