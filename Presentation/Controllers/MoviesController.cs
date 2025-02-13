@@ -118,16 +118,38 @@ namespace Presentation.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteMovie(int id)
         {
-            var movie = await _movieService.GetByIdAsync(id);
+            var movie = await _context.Movies
+                .Include(m => m.Sessions)
+                    .ThenInclude(s => s.Tickets)
+                .Include(m => m.Reviews) 
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (movie == null)
             {
-                return NotFound();
+                return NotFound(new { message = "Movie not found" });
             }
 
-            await _movieService.DeleteAsync(id);
+           
+            foreach (var session in movie.Sessions)
+            {
+                _context.Tickets.RemoveRange(session.Tickets);
+            }
+
+           
+            _context.Sessions.RemoveRange(movie.Sessions);
+
+         
+            _context.Reviews.RemoveRange(movie.Reviews);
+
+            
+            _context.Movies.Remove(movie);
+
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
+
     }
 }
