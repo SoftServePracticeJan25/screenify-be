@@ -100,7 +100,7 @@ namespace Presentation.Controllers
 
 
         [HttpGet("recommended")]
-        [AllowAnonymous]
+        [Authorize(Roles =("User,Admin"))]
         public async Task<IActionResult> GetRecommendedMoviesForUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
