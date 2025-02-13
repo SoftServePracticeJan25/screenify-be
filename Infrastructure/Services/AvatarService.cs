@@ -67,8 +67,8 @@ namespace Infrastructure.Services
             .Include(u => u.Transactions)
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            // Getting user's role
-            var role = (await _userManager.GetRolesAsync(userEntity)).FirstOrDefault();
+            // Getting user's roles
+            var roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
 
             return new UserInfoDto
             {
@@ -78,7 +78,7 @@ namespace Infrastructure.Services
                 PhotoUrl = userEntity.PhotoUrl,
                 ReviewCount = userEntity.Reviews.Count,
                 TransactionCount = userEntity.Transactions.Count,
-                Role = role,
+                Role = roles,
                 EmailConfirmed = userEntity.EmailConfirmed
             };
         }
