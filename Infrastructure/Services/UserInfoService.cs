@@ -34,7 +34,7 @@ namespace Infrastructure.Services
             .Include(u => u.Transactions)  
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
 
             if (user == null)
                 throw new Exception("User not found");
@@ -47,7 +47,7 @@ namespace Infrastructure.Services
                 PhotoUrl = user.PhotoUrl, 
                 ReviewCount = user.Reviews.Count, 
                 TransactionCount = user.Transactions.Count,
-                Role = role,
+                Role = roles,
                 EmailConfirmed = user.EmailConfirmed
             };
         }

@@ -20,13 +20,28 @@ using Domain.Helpers.QueryObject;
 
 namespace Presentation
 {
-     internal abstract class Program
+    internal abstract class Program
     {
         public static void Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddSwaggerGen(option => // Adds JWT Authorization in Swagger
+            var corsPolicy = "_myAllowSpecificOrigins";
+
+            // CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: corsPolicy,
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()   
+                              .AllowAnyMethod()    
+                              .AllowAnyHeader();   
+                    });
+            });
+
+            //  Swagger + JWT 
+            builder.Services.AddSwaggerGen(option =>
             {
                 option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
                 option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -54,16 +69,18 @@ namespace Presentation
                 });
             });
 
-
-            builder.Services.AddControllers().AddNewtonsoftJson(options => // Blocks infinite looping in JSON
+           
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
+            //  MySQL
             var connectionString = builder.Configuration["ConnectionString"];
             builder.Services.AddDbContext<MovieDbContext>(options =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
+            // Identity
             builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = true;
@@ -73,8 +90,9 @@ namespace Presentation
                 options.Password.RequiredLength = 12;
             })
             .AddEntityFrameworkStores<MovieDbContext>()
-            .AddDefaultTokenProviders(); // For Email Confirmation
+            .AddDefaultTokenProviders();
 
+            //  JWT
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme =
@@ -85,7 +103,7 @@ namespace Presentation
                 options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters // JWT Settings
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidIssuer = builder.Configuration["JWT:Issuer"],
@@ -96,12 +114,11 @@ namespace Presentation
                         System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
                 };
 
-                options.Events = new JwtBearerEvents // AccessToken expiration error
+                options.Events = new JwtBearerEvents
                 {
                     OnChallenge = async context =>
                     {
                         context.HandleResponse();
-
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         context.Response.ContentType = "application/json";
 
@@ -117,27 +134,30 @@ namespace Presentation
                 };
             });
 
-            // Configurating Hangfire with SQL server
+            // Hangfire MySQL
             builder.Services.AddHangfire(config =>
-    config.UseStorage(new MySqlStorage(
-        builder.Configuration["HangfireConnection"],
-        new MySqlStorageOptions
-        {
-            TablesPrefix = "Hangfire_", 
-            QueuePollInterval = TimeSpan.FromSeconds(15) 
-        })));
+                config.UseStorage(new MySqlStorage(
+                    builder.Configuration["HangfireConnection"],
+                    new MySqlStorageOptions
+                    {
+                        TablesPrefix = "Hangfire_",
+                        QueuePollInterval = TimeSpan.FromSeconds(15)
+                    })));
 
             builder.Services.AddHangfireServer();
 
+            //  AutoMapper
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddAutoMapper(typeof(MapProfile));
 
-            builder.Services.AddSingleton(_ => // BlobService registration
+            //  Azure Blob Storage
+            builder.Services.AddSingleton(_ =>
             {
                 var connectionString = builder.Configuration["AzureStorage:ConnectionString"];
                 return new BlobServiceClient(connectionString);
             });
 
+            
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<IMovieService, MovieService>();
             builder.Services.AddScoped<IRoomService, RoomService>();
@@ -157,15 +177,12 @@ namespace Presentation
             builder.Services.AddScoped<ISendGridEmailService, SendGridEmailService>();
 
             builder.Services.AddControllers();
-
-            builder.Services.AddAutoMapper(typeof(MapProfile));
-
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             GlobalFontSettings.FontResolver = new CustomFontResolver();
             GlobalFontSettings.UseWindowsFontsUnderWindows = true;
-            
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -174,14 +191,18 @@ namespace Presentation
                 app.UseSwaggerUI();
             }
 
-            // Enabling controll panel of Hangfire
-            app.UseHangfireDashboard();
-            app.MapHangfireDashboard();
+            //  CORS 
+            app.UseCors(corsPolicy);
 
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // Hangfire 
+            app.UseHangfireServer();
+            app.UseHangfireDashboard();
+            app.MapHangfireDashboard();
 
 
             app.MapControllers();

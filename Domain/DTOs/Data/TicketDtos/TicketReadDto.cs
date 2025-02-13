@@ -7,9 +7,22 @@ namespace Domain.DTOs.Data.TicketDtos
 {
     public class TicketReadDto
     {
-        public required int Id { get; set; }
-        public required int SeatNum { get; init; }
-        public required int TransactionId { get; init; }
-        public required int SessionId { get; init; }
+        public int Id { get; set; }
+        public int SeatNum { get; set; }
+
+        public int TransactionId { get; set; }
+        public string? UserId { get; set; }
+        public int? SessionId { get; set; }
+        public DateTime TransactionTime { get; set; }
+
+        public int? MovieId { get; set; }
+        public string? Title { get; set; }
+        public int Duration { get; set; }
+
+        public DateTime StartTime { get; set; }
+        public decimal Price { get; set; }
+
+        public string? RoomName { get; set; }
     }
+
 }
