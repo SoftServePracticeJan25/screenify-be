@@ -29,7 +29,12 @@ namespace Infrastructure.Services
         {
             await _context.Reviews.AddAsync(review);
             await _context.SaveChangesAsync();
-            return _mapper.Map<ReviewReadDto>(review);
+
+            var reviewWithUser = await _context.Reviews
+            .Include(r => r.AppUser)
+            .FirstOrDefaultAsync(r => r.Id == review.Id);
+
+            return _mapper.Map<ReviewReadDto>(reviewWithUser!);
         }
 
         public async Task<List<ReviewReadDto>> GetAllAsync(ReviewQueryObject query)
@@ -48,8 +53,8 @@ namespace Infrastructure.Services
                 reviews = reviews.Where(r => r.AppUserId != null && r.AppUserId.Contains(query.AppUserId));
              }
 
-                var reviewList = await reviews.ToListAsync(); // Now working async
-                return _mapper.Map<List<ReviewReadDto>>(reviewList);
+             var reviewList = await reviews.ToListAsync(); // Now working async
+             return _mapper.Map<List<ReviewReadDto>>(reviewList);
         }
 
         public async Task<ReviewReadDto?> GetByIdAsync(int id)
@@ -62,24 +67,24 @@ namespace Infrastructure.Services
         }
 
         public async Task<ReviewReadDto?> UpdateAsync(int id, ReviewUpdateDto reviewUpdateDto)
-    {
-        var existingReview = await _context.Reviews
-            .Include(r => r.AppUser) 
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (existingReview == null)
         {
-            return null;
+            var existingReview = await _context.Reviews
+                .Include(r => r.AppUser) 
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (existingReview == null)
+            {
+                return null;
+            }
+
+            existingReview.Rating = reviewUpdateDto.Rating;
+            existingReview.Comment = reviewUpdateDto.Comment;
+            existingReview.Likes = reviewUpdateDto.Likes;
+
+            await _context.SaveChangesAsync();
+
+            return _mapper.Map<ReviewReadDto>(existingReview);
         }
-
-        existingReview.Rating = reviewUpdateDto.Rating;
-        existingReview.Comment = reviewUpdateDto.Comment;
-        existingReview.Likes = reviewUpdateDto.Likes;
-
-        await _context.SaveChangesAsync();
-
-        return _mapper.Map<ReviewReadDto>(existingReview);
-    }
 
 
         public async Task<ReviewReadDto?> DeleteAsync(int id)
