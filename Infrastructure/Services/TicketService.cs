@@ -1,6 +1,7 @@
 using AutoMapper;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
+using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
@@ -37,19 +38,35 @@ namespace Infrastructure.Services
             return _mapper.Map<TicketReadDto>(ticketModel);
         }
 
-        public async Task<List<TicketReadDto>> GetAllAsync()
+        public async Task<List<TicketReadDto>> GetAllAsync(TicketQueryObject query)
         {
-            var tickets = await _context.Tickets
+            var ticketsQuery = _context.Tickets
                 .Include(t => t.Transaction)
                     .ThenInclude(transaction => transaction.AppUser)
                 .Include(t => t.Session)
                     .ThenInclude(s => s.Movie)
                 .Include(t => t.Session)
-                    .ThenInclude(s => s.Room).ToListAsync();
-            var ticketDtos = tickets.Select(x => _mapper.Map<TicketReadDto>(x)).ToList();
+                    .ThenInclude(s => s.Room)
+                .AsQueryable();
 
-            return ticketDtos;
+            if (!string.IsNullOrEmpty(query.UserId))
+            {
+                ticketsQuery = ticketsQuery.Where(t => t.Transaction != null && 
+                                                    t.Transaction.AppUser != null && 
+                                                    t.Transaction.AppUser.Id == query.UserId);
+            }
+
+            if (query.MovieId.HasValue)
+            {
+                ticketsQuery = ticketsQuery.Where(t => t.Session != null && 
+                                                    t.Session.Movie != null && 
+                                                    t.Session.Movie.Id == query.MovieId.Value);
+            }
+
+            var tickets = await ticketsQuery.ToListAsync();
+            return tickets.Select(t => _mapper.Map<TicketReadDto>(t)).ToList();
         }
+
 
         public async Task<TicketReadDto?> GetByIdAsync(int id)
         {

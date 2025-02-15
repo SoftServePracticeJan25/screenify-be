@@ -108,15 +108,14 @@ namespace Infrastructure.MappingProfiles
                             CharacterName = ma.CharacterName ?? "Unknown"
                         }).ToList()
                         : new List<MovieActorReadListDto>()));
-
-            
+ 
             CreateMap<Review, ReviewDto>().ReverseMap();
             CreateMap<Review, ReviewUpdateDto>().ReverseMap();
             CreateMap<Review, ReviewCreateDto>().ReverseMap();
             CreateMap<Review, ReviewReadDto>()
-            .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName ?? "Unknown" : "Unknown"))
-            .ForMember(dest => dest.AppUserId, opt => opt.MapFrom(src => src.AppUserId));
-
+                .ForMember(dest => dest.MadeBy, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName ?? "Unknown" : "Unknown"))
+                .ForMember(dest => dest.AppUserId, opt => opt.MapFrom(src => src.AppUserId))
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.PhotoUrl : null));
 
             CreateMap<Transaction, TransactionDto>().ReverseMap();
             CreateMap<Transaction, TransactionCreateDto>().ReverseMap();
