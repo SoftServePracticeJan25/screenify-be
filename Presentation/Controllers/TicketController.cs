@@ -1,6 +1,7 @@
 using AutoMapper;
 using Domain.DTOs.Data.TicketDtos;
 using Domain.Entities;
+using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Hangfire;
 using Infrastructure.DataAccess;
@@ -28,9 +29,9 @@ namespace Presentation.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] TicketQueryObject query)
         {
-            var tickets = await _ticketService.GetAllAsync();
+            var tickets = await _ticketService.GetAllAsync(query);
             return Ok(tickets);
         }
 
