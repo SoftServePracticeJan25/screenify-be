@@ -2,6 +2,7 @@
 using Domain.DTOs.Api;
 using Domain.DTOs.MovieDtos;
 using Domain.Entities;
+using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Identity;
@@ -22,16 +23,23 @@ namespace Infrastructure.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<MovieReadDto>> GetAllAsync()
+        public async Task<IEnumerable<MovieReadDto>> GetAllAsync(MovieQueryObject query)
         {
-            var movies = await _context.Movies
+            var moviesQuery = _context.Movies
                 .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
                 .Include(m => m.MovieActors).ThenInclude(ma => ma.Actor)
                 .Include(m => m.MovieActors).ThenInclude(ma => ma.ActorRole)
-                .ToListAsync();
+                .AsQueryable();
 
+            if (query.GenreId.HasValue)
+            {
+                moviesQuery = moviesQuery.Where(m => m.MovieGenres.Any(mg => mg.GenreId == query.GenreId.Value));
+            }
+
+            var movies = await moviesQuery.ToListAsync();
             return _mapper.Map<IEnumerable<MovieReadDto>>(movies);
         }
+
 
         public async Task<MovieReadDto?> GetByIdAsync(int id)
         {
