@@ -2,11 +2,12 @@
 using Domain.DTOs.Data;
 using Domain.DTOs.MovieDtos;
 using Domain.Entities;
+using Domain.Helpers.QueryObject;
 namespace Domain.Interfaces
 {
     public interface IMovieService
     {
-        Task<IEnumerable<MovieReadDto>> GetAllAsync();
+        Task<IEnumerable<MovieReadDto>> GetAllAsync(MovieQueryObject query);
 
         Task<MovieReadDto?> GetByIdAsync(int id);
 

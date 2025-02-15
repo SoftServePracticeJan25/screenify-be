@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Domain.Helpers.QueryObject;
 
 namespace Presentation.Controllers
 {
@@ -25,9 +26,9 @@ namespace Presentation.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] MovieQueryObject query)
         {
-            var movies = await _movieService.GetAllAsync();
+            var movies = await _movieService.GetAllAsync(query);
             return Ok(movies); // MovieReadDto
         }
 
