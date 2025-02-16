@@ -14,27 +14,18 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Infrastructure.Services
 {
-    public class UserInfoService : IUserInfoService
+    public class UserInfoService(UserManager<AppUser> userManager) : IUserInfoService
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
-        public UserInfoService(UserManager<AppUser> userManager, IHttpContextAccessor httpContextAccessor)
-        {
-            _userManager = userManager;
-            _httpContextAccessor = httpContextAccessor;
-        }
-
         public async Task<UserInfoDto> GetUserInfo(AppUser appUser)
         {
             var userId = appUser.Id;
 
-            var user = await _userManager.Users
+            var user = await userManager.Users
             .Include(u => u.Reviews)  
             .Include(u => u.Transactions)  
             .FirstOrDefaultAsync(u => u.Id == userId);
 
-            var roles = (await _userManager.GetRolesAsync(user)).ToList();
+            var roles = (await userManager.GetRolesAsync(user!)).ToList();
 
             if (user == null)
                 throw new Exception("User not found");
@@ -42,9 +33,9 @@ namespace Infrastructure.Services
             return new UserInfoDto
             {
                 Id = user.Id,
-                Email = user.Email,
-                Username = user.UserName,
-                PhotoUrl = user.PhotoUrl, 
+                Email = user.Email!,
+                Username = user.UserName!,
+                PhotoUrl = user.PhotoUrl!, 
                 ReviewCount = user.Reviews.Count, 
                 TransactionCount = user.Transactions.Count,
                 Role = roles,

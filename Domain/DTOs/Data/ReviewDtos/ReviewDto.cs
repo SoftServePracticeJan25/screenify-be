@@ -1,6 +1,6 @@
 ﻿
 
-namespace Domain.DTOs.Data
+namespace Domain.DTOs.Data.ReviewDtos
 {
     public class ReviewDto
     {

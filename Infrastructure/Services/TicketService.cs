@@ -42,11 +42,11 @@ namespace Infrastructure.Services
         {
             var ticketsQuery = _context.Tickets
                 .Include(t => t.Transaction)
-                    .ThenInclude(transaction => transaction.AppUser)
+                    .ThenInclude(transaction => transaction!.AppUser)
                 .Include(t => t.Session)
-                    .ThenInclude(s => s.Movie)
+                    .ThenInclude(s => s!.Movie)
                 .Include(t => t.Session)
-                    .ThenInclude(s => s.Room)
+                    .ThenInclude(s => s!.Room)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(query.UserId))
@@ -72,11 +72,11 @@ namespace Infrastructure.Services
         {
             var ticket = await _context.Tickets
                 .Include(t => t.Transaction)
-                    .ThenInclude(transaction => transaction.AppUser)
+                    .ThenInclude(transaction => transaction!.AppUser)
                 .Include(t => t.Session)
-                    .ThenInclude(s => s.Movie)
+                    .ThenInclude(s => s!.Movie)
                 .Include(t => t.Session)
-                    .ThenInclude(s => s.Room)
+                    .ThenInclude(s => s!.Room)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             var ticketDto = _mapper.Map<TicketReadDto>(ticket);

@@ -15,7 +15,7 @@ namespace Domain.Helpers.QueryObject
             return File.ReadAllBytes(fontPath);
         }
 
-        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             if (familyName.Equals("Courier New", StringComparison.OrdinalIgnoreCase))
             {
