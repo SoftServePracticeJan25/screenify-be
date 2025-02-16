@@ -74,6 +74,29 @@ namespace Presentation.Controllers
             return Ok(reviewDto);
         }
 
+        [HttpPatch("{id:int}")]
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Patch([FromRoute] int id, [FromBody] ReviewPatchDto reviewPatchDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var review = await reviewService.GetByIdAsync(id);
+            if (review == null) return NotFound();
+
+            var userId = userManager.GetUserId(User);
+            var isAdmin = User.IsInRole("Admin");
+   
+            if (review.AppUserId != userId && !isAdmin)
+            {
+                return Forbid(); // 403 Forbidden
+            }
+
+            var updatedReview = await reviewService.PatchAsync(id, reviewPatchDto);
+            return updatedReview == null ? NotFound() : Ok(updatedReview);
+        }
+
+
         [HttpDelete("{id:int}")]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete([FromRoute] int id)
