@@ -4,43 +4,40 @@ using Domain.Entities;
 using Domain.Helpers.QueryObject;
 using Domain.Interfaces;
 using Infrastructure.DataAccess;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SendGrid.Helpers.Mail;
+using System.Security.Claims;
 
 namespace Infrastructure.Services
 {
-    public class TicketService : ITicketService
+    public class TicketService(MovieDbContext context, IMapper mapper,
+        UserManager<AppUser> userManager) : ITicketService
     {
-        private readonly MovieDbContext _context;
-        private readonly IMapper _mapper;
-        public TicketService(MovieDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
         public async Task<TicketReadDto> AddAsync(Ticket ticket)
         {
-            await _context.Tickets.AddAsync(ticket);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<TicketReadDto>(ticket);
+            await context.Tickets.AddAsync(ticket);
+            await context.SaveChangesAsync();
+            return mapper.Map<TicketReadDto>(ticket);
         }
 
         public async Task<TicketReadDto?> DeleteAsync(int id)
         {
-            var ticketModel = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+            var ticketModel = await context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
 
             if (ticketModel == null)
             {
                 return null;
             }
 
-            _context.Tickets.Remove(ticketModel);
-            await _context.SaveChangesAsync();
-            return _mapper.Map<TicketReadDto>(ticketModel);
+            context.Tickets.Remove(ticketModel);
+            await context.SaveChangesAsync();
+            return mapper.Map<TicketReadDto>(ticketModel);
         }
 
         public async Task<List<TicketReadDto>> GetAllAsync(TicketQueryObject query)
         {
-            var ticketsQuery = _context.Tickets
+            var ticketsQuery = context.Tickets
                 .Include(t => t.Transaction)
                     .ThenInclude(transaction => transaction!.AppUser)
                 .Include(t => t.Session)
@@ -64,13 +61,13 @@ namespace Infrastructure.Services
             }
 
             var tickets = await ticketsQuery.ToListAsync();
-            return tickets.Select(t => _mapper.Map<TicketReadDto>(t)).ToList();
+            return tickets.Select(t => mapper.Map<TicketReadDto>(t)).ToList();
         }
 
 
         public async Task<TicketReadDto?> GetByIdAsync(int id)
         {
-            var ticket = await _context.Tickets
+            var ticket = await context.Tickets
                 .Include(t => t.Transaction)
                     .ThenInclude(transaction => transaction!.AppUser)
                 .Include(t => t.Session)
@@ -79,19 +76,40 @@ namespace Infrastructure.Services
                     .ThenInclude(s => s!.Room)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-            var ticketDto = _mapper.Map<TicketReadDto>(ticket);
+            var ticketDto = mapper.Map<TicketReadDto>(ticket);
 
             return ticketDto;
         }
 
+        public async Task<List<TicketReadDto>> GetUserTicketsAsync(ClaimsPrincipal user)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                throw new UnauthorizedAccessException("Invalid token. No user ID found.");
+
+            var tickets = await context.Tickets
+                .Include(t => t.Transaction)
+                    .ThenInclude(u => u!.AppUser)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s!.Movie)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s!.Room)
+                .Where(t => t.Transaction != null && t.Transaction.AppUserId == userId)
+                .ToListAsync();
+
+            return mapper.Map<List<TicketReadDto>>(tickets);
+        }
+
+
+
         public async Task<bool> TicketExist(int id)
         {
-            return await _context.Tickets.AnyAsync(s => s.Id == id);
+            return await context.Tickets.AnyAsync(s => s.Id == id);
         }
 
         public async Task<TicketReadDto?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto)
         {
-            var existingTicket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
+            var existingTicket = await context.Tickets.FirstOrDefaultAsync(x => x.Id == id);
 
             if(existingTicket == null)
             {
@@ -102,9 +120,9 @@ namespace Infrastructure.Services
             existingTicket.SessionId = ticketUpdateDto.SessionId;
             existingTicket.TransactionId = ticketUpdateDto.TransactionId;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
-            return _mapper.Map<TicketReadDto>(existingTicket);
+            return mapper.Map<TicketReadDto>(existingTicket);
         }
     }
 }
