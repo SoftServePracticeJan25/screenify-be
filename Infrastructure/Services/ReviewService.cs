@@ -86,6 +86,29 @@ namespace Infrastructure.Services
             return _mapper.Map<ReviewReadDto>(existingReview);
         }
 
+        public async Task<ReviewReadDto?> PatchAsync(int id, ReviewPatchDto reviewPatchDto)
+        {
+            var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+
+            if (existingReview == null)
+            {
+                return null;
+            }
+
+            if (reviewPatchDto.Rating.HasValue)
+            {
+                existingReview.Rating = reviewPatchDto.Rating.Value;
+            }
+
+            if (!string.IsNullOrEmpty(reviewPatchDto.Comment))
+            {
+                existingReview.Comment = reviewPatchDto.Comment;
+            }
+
+            await _context.SaveChangesAsync();
+            return _mapper.Map<ReviewReadDto>(existingReview);
+        }
+
 
         public async Task<ReviewReadDto?> DeleteAsync(int id)
         {

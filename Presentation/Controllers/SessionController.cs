@@ -38,7 +38,7 @@ namespace Presentation.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(SessionDto session)
+        public async Task<IActionResult> Create(SessionCreateDto session)
         {
             var createdSession = await _sessionService.CreateAsync(session);
             return CreatedAtAction(nameof(GetById), new { id = createdSession.MovieId }, createdSession);
@@ -46,7 +46,7 @@ namespace Presentation.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, SessionDto session)
+        public async Task<IActionResult> Update(int id, SessionCreateDto session)
         {
             try
             {

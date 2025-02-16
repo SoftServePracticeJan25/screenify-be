@@ -9,6 +9,7 @@ namespace Domain.Interfaces
         Task<ReviewReadDto?> GetByIdAsync(int id);
         Task<ReviewReadDto> AddAsync(Review review);
         Task<ReviewReadDto?> UpdateAsync(int id, ReviewUpdateDto reviewUpdateDto);
+        Task<ReviewReadDto?> PatchAsync(int id, ReviewPatchDto reviewPatchDto);
         Task <ReviewReadDto?> DeleteAsync(int id);
         Task<bool> ReviewExist(int movieId, string appUserId);
     }

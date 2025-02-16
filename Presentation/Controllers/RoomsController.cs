@@ -58,19 +58,14 @@ namespace Presentation.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] RoomCreateDto roomCreateDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var isUpdated = await _roomService.UpdateAsync(id, roomCreateDto);
+            if (!isUpdated)
+                return NotFound(new { message = "Room not found" });
 
-            var updated = await _roomService.UpdateAsync(id, roomCreateDto);
-            if (!updated)
-            {
-                return NotFound();
-            }
-
-            return NoContent();
+            var updatedRoom = await _roomService.GetByIdAsync(id); 
+            return Ok(updatedRoom); 
         }
+
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "User,Admin")]

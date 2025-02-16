@@ -203,17 +203,27 @@ namespace Infrastructure.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var sessions = await _context.Sessions.Where(s => s.MovieId == id).ToListAsync();
-            if (sessions.Any())
-                _context.Sessions.RemoveRange(sessions);
+            var movie = await _context.Movies
+                .Include(m => m.Sessions)
+                    .ThenInclude(s => s.Tickets)
+                .Include(m => m.Reviews)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            var movie = await _context.Movies.FindAsync(id);
             if (movie == null)
                 return false;
 
+            foreach (var session in movie.Sessions)
+            {
+                _context.Tickets.RemoveRange(session.Tickets);
+            }
+
+            _context.Sessions.RemoveRange(movie.Sessions);
+            _context.Reviews.RemoveRange(movie.Reviews);
             _context.Movies.Remove(movie);
+
             await _context.SaveChangesAsync();
             return true;
         }
+
     }
 }

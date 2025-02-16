@@ -38,8 +38,6 @@ namespace Infrastructure.MappingProfiles
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.GenreId))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Genre != null ? src.Genre.Name : "Unknown"));
 
-            CreateMap<Room, RoomReadDto>();
-            CreateMap<RoomCreateDto, Room>();
             CreateMap<CinemaType, CinemaTypeDto>();
             CreateMap<Genre, GenreDto>().ReverseMap();
 
@@ -150,12 +148,22 @@ namespace Infrastructure.MappingProfiles
                     : src.Session.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
             .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1Ф, Odesa, Odesa Oblast, 65000"));
 
+            CreateMap<Room, RoomReadDto>()
+             .ForMember(dest => dest.CinemaTypeName, opt => opt.MapFrom(src => src.CinemaType.Name)); 
+
+            CreateMap<RoomCreateDto, Room>();
             CreateMap<Room, RoomDto>();
-            CreateMap<Session, SessionDto>().ReverseMap()
+
+            CreateMap<Session, SessionDto>()
+                .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.Name)); 
+
+            CreateMap<SessionCreateDto, Session>() 
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Movie, opt => opt.Ignore())
                 .ForMember(dest => dest.Room, opt => opt.Ignore())
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore());
+
+
 
             CreateMap<GenreCreateDto, Genre>();
             CreateMap<CinemaType, CinemaTypeReadDto>().ReverseMap();
