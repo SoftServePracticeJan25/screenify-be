@@ -11,6 +11,6 @@ namespace Domain.DTOs.Data.RoomDtos
         public int Id { get; set; }
         public required string Name { get; set; }
         public int SeatsAmount { get; set; }
-        public int? CinemaTypeId { get; set; }
+        public required string CinemaTypeName { get; set; }
     }
 }

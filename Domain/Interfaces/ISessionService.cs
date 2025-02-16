@@ -12,8 +12,9 @@ namespace Domain.Interfaces
     {
         Task<IEnumerable<SessionDto>> GetAllAsync(SessionQueryObject query);
         Task<SessionDto> GetByIdAsync(int id);
-        Task<SessionDto> CreateAsync(SessionDto session);
-        Task<SessionDto> UpdateAsync(int id, SessionDto session);
+        Task<SessionDto> CreateAsync(SessionCreateDto session); 
+        Task<SessionDto> UpdateAsync(int id, SessionCreateDto session); 
         Task<bool> DeleteAsync(int id);
     }
+
 }
