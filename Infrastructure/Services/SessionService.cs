@@ -57,6 +57,11 @@ namespace Infrastructure.Services
                     s.Movie.MovieGenres.Any(mg => mg.GenreId == query.GenreId.Value));
             }
 
+            if (query.MovieId.HasValue)
+            {
+                sessions = sessions.Where(s => s.MovieId.Value == query.MovieId.Value);
+            }
+
             var sessionList = await sessions.ToListAsync();
             return _mapper.Map<List<SessionDto>>(sessionList);
         }
