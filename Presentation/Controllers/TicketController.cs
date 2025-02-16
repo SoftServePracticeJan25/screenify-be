@@ -19,16 +19,11 @@ namespace Presentation.Controllers
         UserManager<AppUser> userManager,
         ITransactionService transactionService) : ControllerBase
     {
-        private readonly ITicketService _ticketService = ticketService;
-        private readonly IMapper _mapper = mapper;
-        private readonly UserManager<AppUser> _userManager = userManager;
-        private readonly ITransactionService _transactionService = transactionService;
-
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll([FromQuery] TicketQueryObject query)
         {
-            var tickets = await _ticketService.GetAllAsync(query);
+            var tickets = await ticketService.GetAllAsync(query);
             return Ok(tickets);
         }
 
@@ -36,16 +31,16 @@ namespace Presentation.Controllers
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var ticket = await _ticketService.GetByIdAsync(id);
+            var ticket = await ticketService.GetByIdAsync(id);
             if (ticket == null)
             {
                 return NotFound();
             }
 
-            var userId = _userManager.GetUserId(User);
+            var userId = userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            var transaction = await transactionService.GetByIdAsync(ticket.TransactionId);
             if (transaction == null)
             {
                 return NotFound();
@@ -59,6 +54,22 @@ namespace Presentation.Controllers
             return Ok(ticket);
         }
 
+        [HttpGet("my-tickets")]
+        [Authorize]
+        public async Task<IActionResult> GetUserTickets()
+        {
+            try
+            {
+                var userTickets = await ticketService.GetUserTicketsAsync(User);
+                return Ok(userTickets);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+        }
+
+
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Create([FromBody] TicketCreateDto ticketCreateDto)
@@ -66,19 +77,19 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var userId = _userManager.GetUserId(User);
-            var transactionDto = await _transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
+            var userId = userManager.GetUserId(User);
+            var transactionDto = await transactionService.GetByIdAsync(ticketCreateDto.TransactionId);
 
             if (transactionDto == null || transactionDto.AppUserId != userId)
             {
                 return Forbid();
             }
 
-            var ticket = _mapper.Map<Ticket>(ticketCreateDto);
-            await _ticketService.AddAsync(ticket);
+            var ticket = mapper.Map<Ticket>(ticketCreateDto);
+            await ticketService.AddAsync(ticket);
 
             // Sending email to user with needed files
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await userManager.FindByIdAsync(userId);
 
             if (user == null || string.IsNullOrEmpty(user.Email))
             {
@@ -100,7 +111,7 @@ namespace Presentation.Controllers
             //if (!user.EmailConfirmed) return BadRequest("Confirm email first");
 
 
-            var ticketDto = _mapper.Map<TicketReadDto>(ticket);
+            var ticketDto = mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
         }
 
@@ -112,22 +123,22 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ticket = await _ticketService.GetByIdAsync(id);
+            var ticket = await ticketService.GetByIdAsync(id);
             if (ticket == null)
             {
                 return NotFound();
             }
 
-            var userId = _userManager.GetUserId(User);
+            var userId = userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            var transaction = await transactionService.GetByIdAsync(ticket.TransactionId);
             if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
             {
                 return Forbid();
             }
 
-            var updatedTicket = await _ticketService.UpdateAsync(id, ticketUpdateDto);
+            var updatedTicket = await ticketService.UpdateAsync(id, ticketUpdateDto);
             return Ok(updatedTicket);
         }
 
@@ -138,22 +149,22 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var ticket = await _ticketService.GetByIdAsync(id);
+            var ticket = await ticketService.GetByIdAsync(id);
             if (ticket == null)
             {
                 return NotFound();
             }
 
-            var userId = _userManager.GetUserId(User);
+            var userId = userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            var transaction = await _transactionService.GetByIdAsync(ticket.TransactionId);
+            var transaction = await transactionService.GetByIdAsync(ticket.TransactionId);
             if (transaction == null || (transaction.AppUserId != userId && !isAdmin))
             {
                 return Forbid();
             }
 
-            await _ticketService.DeleteAsync(id);
+            await ticketService.DeleteAsync(id);
             return NoContent();
         }
     }
