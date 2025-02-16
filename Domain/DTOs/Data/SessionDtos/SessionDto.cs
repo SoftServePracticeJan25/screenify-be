@@ -2,6 +2,7 @@
 {
     public class SessionDto
     {
+        public string? Id { get; set; }
         public required DateTime StartTime { get; set; }
         public required decimal Price { get; set; }
 

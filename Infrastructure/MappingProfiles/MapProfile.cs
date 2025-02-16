@@ -84,8 +84,8 @@ namespace Infrastructure.MappingProfiles
                     src.MovieGenres != null
                         ? src.MovieGenres.Select(mg => mg.Genre).Where(g => g != null).Select(g => new GenreDto
                         {
-                            Id = g.Id,
-                            Name = g.Name
+                            Id = g!.Id,
+                            Name = g.Name!
                         }).ToList()
                         : new List<GenreDto>()))
                 .ForMember(dest => dest.Actors, opt => opt.MapFrom(src =>
@@ -124,38 +124,38 @@ namespace Infrastructure.MappingProfiles
             CreateMap<Ticket, TicketCreateDto>().ReverseMap();
             CreateMap<Ticket, TicketUpdateDto>().ReverseMap();
             CreateMap<Ticket, TicketReadDto>()
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Transaction.AppUser.Id))  // маппим UserId
-            .ForMember(dest => dest.TransactionTime, opt => opt.MapFrom(src => src.Transaction.CreationTime)) // маппим время транзакции
-            .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.Session.Movie.Id)) // маппим MovieId
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session.Movie.Title)) // маппим Title
-            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Session.Movie.Duration)) // маппим Duration
-            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Session.StartTime)) // маппим StartTime
-            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Session.Price)) // маппим Price
-            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Session.Room.Name)); // маппим RoomName
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Transaction!.AppUser!.Id))  // маппим UserId
+            .ForMember(dest => dest.TransactionTime, opt => opt.MapFrom(src => src.Transaction!.CreationTime)) // маппим время транзакции
+            .ForMember(dest => dest.MovieId, opt => opt.MapFrom(src => src.Session!.Movie!.Id)) // маппим MovieId
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session!.Movie!.Title)) // маппим Title
+            .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Session!.Movie!.Duration)) // маппим Duration
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Session!.StartTime)) // маппим StartTime
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Session!.Price)) // маппим Price
+            .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Session!.Room!.Name)); // маппим RoomName
             CreateMap<Ticket, TicketFileDto>()
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Session != null && src.Session.Room != null ? src.Session.Room.Name : "Unknown"))
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Session != null && src.Session.Movie != null ? src.Session!.Movie!.Title : "Unknown"))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Session != null && src.Session.Room != null ? src.Session!.Room!.Name : "Unknown"))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.Session != null ? src.Session.StartTime : DateTime.MinValue))
             .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Session != null ? src.Session.Price : 0));
             CreateMap<Ticket, TicketNotifDto>()
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => 
-                src.Session != null && src.Session.Movie != null ? src.Session.Movie.Title : "Unknown"))
+                src.Session != null && src.Session.Movie != null ? src.Session!.Movie!.Title : "Unknown"))
             .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => 
                 src.Session != null ? src.Session.StartTime : DateTime.MinValue))
             .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => 
-                src.Session != null && src.Session.Movie != null && src.Session.Movie.Duration > 0 
+                src.Session != null && src.Session.Movie != null && src.Session!.Movie!.Duration > 0 
                     ? src.Session.StartTime.AddMinutes(src.Session.Movie.Duration) 
-                    : src.Session.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
+                    : src.Session!.StartTime.AddMinutes(120))) // Если нет Duration, то 2 часа по умолчанию
             .ForMember(dest => dest.Adress, opt => opt.MapFrom(_ => "Shevchenka Ave, 1Ф, Odesa, Odesa Oblast, 65000"));
 
             CreateMap<Room, RoomReadDto>()
-             .ForMember(dest => dest.CinemaTypeName, opt => opt.MapFrom(src => src.CinemaType.Name)); 
+             .ForMember(dest => dest.CinemaTypeName, opt => opt.MapFrom(src => src.CinemaType!.Name)); 
 
             CreateMap<RoomCreateDto, Room>();
             CreateMap<Room, RoomDto>();
 
             CreateMap<Session, SessionDto>()
-                .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room.Name)); 
+                .ForMember(dest => dest.RoomName, opt => opt.MapFrom(src => src.Room!.Name)); 
 
             CreateMap<SessionCreateDto, Session>() 
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

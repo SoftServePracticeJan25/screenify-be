@@ -50,10 +50,7 @@ namespace Infrastructure.Services
                     .ThenInclude(ma => ma.Actor)
                 .Include(m => m.MovieActors)
                     .ThenInclude(ma => ma.ActorRole)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (movie == null)
-                throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                .FirstOrDefaultAsync(m => m.Id == id) ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");             
 
             return _mapper.Map<MovieReadDto>(movie);
         }
@@ -158,8 +155,8 @@ namespace Infrastructure.Services
  
             var purchasedMovies = await _context.Transactions
                 .Where(t => t.AppUserId == userId)
-                .SelectMany(t => t.Tickets.Select(ticket => ticket.Session.Movie))
-                .Include(m => m.MovieGenres)
+                .SelectMany(t => t.Tickets.Select(ticket => ticket.Session!.Movie!))
+                .Include(m => m!.MovieGenres)
                     .ThenInclude(mg => mg.Genre)
                 .Distinct()
                 .ToListAsync();
@@ -171,7 +168,7 @@ namespace Infrastructure.Services
 
             // collect all genres
             var genreIds = purchasedMovies
-                .SelectMany(m => m.MovieGenres.Select(mg => mg.GenreId))
+                .SelectMany(m => m!.MovieGenres.Select(mg => mg.GenreId))
                 .Distinct()
                 .ToList();
 

@@ -12,7 +12,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/transaction")]
-    public class TransactionController(ITransactionService transactionService, IMapper mapper, UserManager<AppUser> userManager, IFilesGenerationService filesGenerationService) : ControllerBase
+    public class TransactionController(ITransactionService transactionService, IMapper mapper, UserManager<AppUser> userManager/*, IFilesGenerationService filesGenerationService*/) : ControllerBase
     {
         [HttpGet]
         [Authorize(Roles="Admin")]
@@ -32,7 +32,7 @@ namespace Presentation.Controllers
             var userId = userManager.GetUserId(User);
             var IsAdmin = User.IsInRole("Admin");
 
-            if (transaction.AppUserId != userId && IsAdmin) return Forbid();
+            if (transaction!.AppUserId != userId && IsAdmin) return Forbid();
 
             if(transaction == null)
             {
@@ -41,6 +41,7 @@ namespace Presentation.Controllers
 
             return Ok(transaction);
         }
+
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Create([FromBody] TransactionCreateDto transactionCreateDto)
@@ -59,6 +60,7 @@ namespace Presentation.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = transactionDto.Id }, transactionDto);
         }
+
         [HttpPut]
         [Route("{id:int}")]
         [Authorize(Roles = "Admin")]

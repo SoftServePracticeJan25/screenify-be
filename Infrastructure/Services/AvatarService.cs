@@ -25,7 +25,7 @@ namespace Infrastructure.Services
             _userManager = userManager;
         }
 
-        public async Task<UserInfoDto> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user)
+        public async Task<UserInfoDto?> UploadAvatarAsync(IFormFile file, ClaimsPrincipal user)
         {
             if (file == null || file.Length == 0)
                 throw new ArgumentException("File is empty.");
@@ -75,14 +75,14 @@ namespace Infrastructure.Services
             .FirstOrDefaultAsync(u => u.Id == userId);
 
             // Getting user's roles
-            var roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
+            var roles = (await _userManager.GetRolesAsync(userEntity!)).ToList();
 
             return new UserInfoDto
             {
-                Id = userEntity.Id,
-                Email = userEntity.Email,
-                Username = userEntity.UserName,
-                PhotoUrl = userEntity.PhotoUrl,
+                Id = userEntity!.Id,
+                Email = userEntity.Email!,
+                Username = userEntity.UserName!,
+                PhotoUrl = userEntity.PhotoUrl!,
                 ReviewCount = userEntity.Reviews.Count,
                 TransactionCount = userEntity.Transactions.Count,
                 Role = roles,

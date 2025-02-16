@@ -8,20 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services
 {
-    public class StatisticService : IStatisticService
+    public class StatisticService(MovieDbContext context) : IStatisticService
     {
-        private readonly MovieDbContext _context;
-
-        public StatisticService(MovieDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<List<StatisticBestSoldMoviesDto>> GetBestSellingMoviesAsync(StatisticDateQuery query)
         {
-            var tickets = _context.Tickets
+            var tickets = context.Tickets
                 .Include(t => t.Session)
-                .ThenInclude(s => s.Movie)
+                .ThenInclude(s => s!.Movie)
                 .AsQueryable();
 
             if (query.StartDate.HasValue)
@@ -45,7 +38,7 @@ namespace Infrastructure.Services
 
         public async Task<List<StatisticMostRatedMoviesDto>> GetBestRatedMoviesAsync(StatisticDateQuery query)
         {
-            var reviews = _context.Reviews
+            var reviews = context.Reviews
                 .Include(r => r.Movie)
                 .AsQueryable();
 
@@ -70,10 +63,10 @@ namespace Infrastructure.Services
 
         public async Task<List<StatisticMostPopularGenre>> GetMostPopularGenresAsync(StatisticDateQuery query)
         {
-            var tickets = _context.Tickets
+            var tickets = context.Tickets
                 .Include(t => t.Session)
-                .ThenInclude(s => s.Movie)
-                .ThenInclude(m => m.MovieGenres)
+                .ThenInclude(s => s!.Movie)
+                .ThenInclude(m => m!.MovieGenres)
                 .ThenInclude(mg => mg.Genre)
                 .AsQueryable();
 

@@ -12,20 +12,13 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/rooms")]
-    public class RoomsController : ControllerBase
+    public class RoomsController(IRoomService roomService) : ControllerBase
     {
-        private readonly IRoomService _roomService;
-
-        public RoomsController(IRoomService roomService)
-        {
-            _roomService = roomService;
-        }
-
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
-            var rooms = await _roomService.GetAllAsync();
+            var rooms = await roomService.GetAllAsync();
             return Ok(rooms);
         }
 
@@ -33,7 +26,7 @@ namespace Presentation.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
-            var room = await _roomService.GetByIdAsync(id);
+            var room = await roomService.GetByIdAsync(id);
             if (room == null)
             {
                 return NotFound();
@@ -50,7 +43,7 @@ namespace Presentation.Controllers
                 return BadRequest(ModelState);
             }
 
-            var createdRoom = await _roomService.AddAsync(roomCreateDto);
+            var createdRoom = await roomService.AddAsync(roomCreateDto);
             return CreatedAtAction(nameof(GetById), new { id = createdRoom.Id }, createdRoom);
         }
 
@@ -58,11 +51,11 @@ namespace Presentation.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] RoomCreateDto roomCreateDto)
         {
-            var isUpdated = await _roomService.UpdateAsync(id, roomCreateDto);
+            var isUpdated = await roomService.UpdateAsync(id, roomCreateDto);
             if (!isUpdated)
                 return NotFound(new { message = "Room not found" });
 
-            var updatedRoom = await _roomService.GetByIdAsync(id); 
+            var updatedRoom = await roomService.GetByIdAsync(id); 
             return Ok(updatedRoom); 
         }
 
@@ -71,7 +64,7 @@ namespace Presentation.Controllers
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _roomService.DeleteAsync(id);
+            var deleted = await roomService.DeleteAsync(id);
             if (!deleted)
             {
                 return NotFound();
