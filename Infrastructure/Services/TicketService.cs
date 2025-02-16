@@ -89,6 +89,7 @@ namespace Infrastructure.Services
 
             var tickets = await context.Tickets
                 .Include(t => t.Transaction)
+                    .ThenInclude(u => u!.AppUser)
                 .Include(t => t.Session)
                     .ThenInclude(s => s!.Movie)
                 .Include(t => t.Session)
