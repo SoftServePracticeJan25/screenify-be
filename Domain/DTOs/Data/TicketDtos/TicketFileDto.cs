@@ -11,6 +11,6 @@ namespace Domain.DTOs.Data.TicketDtos
         public required string Title { get; init; }
         public DateTime StartTime { get; init; }
         public decimal Price { get; init; }
-        public string Name { get; init; } // Room
+        public string? Name { get; init; } // Room
     }
 }

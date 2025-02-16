@@ -38,7 +38,7 @@ namespace Presentation.Controllers
                 return BadRequest(ModelState);
 
             var userId = userManager.GetUserId(User);
-            reviewCreateDto.AppUserId = userId;
+            reviewCreateDto.AppUserId = userId!;
 
             if (await reviewService.ReviewExist(reviewCreateDto.MovieId, reviewCreateDto.AppUserId))
             {

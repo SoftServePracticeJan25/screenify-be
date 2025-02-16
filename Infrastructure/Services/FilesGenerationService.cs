@@ -33,9 +33,9 @@ namespace Infrastructure.Services
         {
             var ticket = await _context.Tickets
                 .Include(t => t.Session)  
-                .ThenInclude(s => s.Movie)  
+                .ThenInclude(s => s!.Movie)  
                 .Include(t => t.Session)   
-                .ThenInclude(s => s.Room)  
+                .ThenInclude(s => s!.Room)  
                 .FirstOrDefaultAsync(t => t.Id == ticketId);
 
             if (ticket == null)
@@ -70,7 +70,7 @@ namespace Infrastructure.Services
             section.AddParagraph($"Price: {ticketFileDto.Price}").Style = "CourierStyle";
             section.AddParagraph($"Start time: {ticketFileDto.StartTime}").Style = "CourierStyle";
             
-            PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true);
+            PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer();
             pdfRenderer.Document = document;
             pdfRenderer.RenderDocument();
 
@@ -103,7 +103,7 @@ namespace Infrastructure.Services
             section.AddParagraph($"Sum: {transactionDto.Sum}").Style = "CourierStyle";
             section.AddParagraph($"Date time: {transactionDto.CreationTime}").Style = "CourierStyle";
             
-            PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true);
+            PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer();
             pdfRenderer.Document = document;
             pdfRenderer.RenderDocument();
 

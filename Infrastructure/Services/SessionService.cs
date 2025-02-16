@@ -13,22 +13,13 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Services
 {
-    public class SessionService : ISessionService
+    public class SessionService(MovieDbContext context, IMapper mapper) : ISessionService
     {
-        private readonly MovieDbContext _context;
-        private readonly IMapper _mapper;
-
-        public SessionService(MovieDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
         public async Task<IEnumerable<SessionDto>> GetAllAsync(SessionQueryObject query)
         {
-            var sessions = _context.Sessions
+            var sessions = context.Sessions
             .Include(s => s.Movie)
-            .ThenInclude(m => m.MovieGenres) 
+            .ThenInclude(m => m!.MovieGenres) 
             .Include(s => s.Room)
             .AsQueryable();
 
@@ -60,58 +51,58 @@ namespace Infrastructure.Services
 
             if (query.MovieId.HasValue)
             {
-                sessions = sessions.Where(s => s.MovieId.Value == query.MovieId.Value);
+                sessions = sessions.Where(s => s.MovieId!.Value == query.MovieId.Value);
             }
 
             var sessionList = await sessions.ToListAsync();
-            return _mapper.Map<List<SessionDto>>(sessionList);
+            return mapper.Map<List<SessionDto>>(sessionList);
         }
 
         public async Task<SessionDto> GetByIdAsync(int id)
         {
-            var session = await _context.Sessions
+            var session = await context.Sessions
                  .Include(s => s.Room) // RoomName
                  .FirstOrDefaultAsync(s => s.Id == id);
-            return _mapper.Map<SessionDto>(session);
+            return mapper.Map<SessionDto>(session);
         }
 
         public async Task<SessionDto> CreateAsync(SessionCreateDto sessionDto)
         {
-            var session = _mapper.Map<Session>(sessionDto);
-            _context.Sessions.Add(session);
-            await _context.SaveChangesAsync();
+            var session = mapper.Map<Session>(sessionDto);
+            context.Sessions.Add(session);
+            await context.SaveChangesAsync();
 
            
-            var createdSession = await _context.Sessions
+            var createdSession = await context.Sessions
                 .Include(s => s.Room)
                 .FirstOrDefaultAsync(s => s.Id == session.Id);
 
-            return _mapper.Map<SessionDto>(createdSession);
+            return mapper.Map<SessionDto>(createdSession);
         }
 
 
         public async Task<SessionDto> UpdateAsync(int id, SessionCreateDto sessionDto)
         {
-            var session = await _context.Sessions
+            var session = await context.Sessions
                 .Include(s => s.Room) 
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (session == null) throw new KeyNotFoundException("Session not found");
 
-            _mapper.Map(sessionDto, session);
-            await _context.SaveChangesAsync();
+            mapper.Map(sessionDto, session);
+            await context.SaveChangesAsync();
 
-            return _mapper.Map<SessionDto>(session);
+            return mapper.Map<SessionDto>(session);
         }
 
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            var session = await context.Sessions.FindAsync(id);
             if (session == null) return false;
 
-            _context.Sessions.Remove(session);
-            await _context.SaveChangesAsync();
+            context.Sessions.Remove(session);
+            await context.SaveChangesAsync();
             return true;
         }
     }

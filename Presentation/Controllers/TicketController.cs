@@ -17,10 +17,7 @@ namespace Presentation.Controllers
         ITicketService ticketService,
         IMapper mapper,
         UserManager<AppUser> userManager,
-        ITransactionService transactionService,
-        IFilesGenerationService filesGenerationService,
-        ISendGridEmailService emailService,
-        MovieDbContext context) : ControllerBase
+        ITransactionService transactionService) : ControllerBase
     {
         private readonly ITicketService _ticketService = ticketService;
         private readonly IMapper _mapper = mapper;
