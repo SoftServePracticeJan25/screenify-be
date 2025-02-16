@@ -29,6 +29,7 @@ namespace Infrastructure.Services
             var sessions = _context.Sessions
             .Include(s => s.Movie)
             .ThenInclude(m => m.MovieGenres) 
+            .Include(s => s.Room)
             .AsQueryable();
 
             if (query.StartDate.HasValue)
@@ -68,28 +69,41 @@ namespace Infrastructure.Services
 
         public async Task<SessionDto> GetByIdAsync(int id)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            var session = await _context.Sessions
+                 .Include(s => s.Room) // RoomName
+                 .FirstOrDefaultAsync(s => s.Id == id);
             return _mapper.Map<SessionDto>(session);
         }
 
-        public async Task<SessionDto> CreateAsync(SessionDto sessionDto)
+        public async Task<SessionDto> CreateAsync(SessionCreateDto sessionDto)
         {
             var session = _mapper.Map<Session>(sessionDto);
             _context.Sessions.Add(session);
             await _context.SaveChangesAsync();
-            return _mapper.Map<SessionDto>(session);
+
+           
+            var createdSession = await _context.Sessions
+                .Include(s => s.Room)
+                .FirstOrDefaultAsync(s => s.Id == session.Id);
+
+            return _mapper.Map<SessionDto>(createdSession);
         }
 
-        public async Task<SessionDto> UpdateAsync(int id, SessionDto sessionDto)
+
+        public async Task<SessionDto> UpdateAsync(int id, SessionCreateDto sessionDto)
         {
-            var session = await _context.Sessions.FindAsync(id);
+            var session = await _context.Sessions
+                .Include(s => s.Room) 
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             if (session == null) throw new KeyNotFoundException("Session not found");
 
-            _mapper.Map(sessionDto, session); // Обновляет свойства `session` из `sessionDto`
+            _mapper.Map(sessionDto, session);
             await _context.SaveChangesAsync();
 
             return _mapper.Map<SessionDto>(session);
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

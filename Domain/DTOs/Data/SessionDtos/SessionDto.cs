@@ -7,5 +7,6 @@
 
         public required int MovieId { get; set; }
         public required int RoomId { get; set; }
+        public required string RoomName { get; set; }
     }
 }
