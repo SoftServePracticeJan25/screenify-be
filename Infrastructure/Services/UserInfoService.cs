@@ -42,5 +42,32 @@ namespace Infrastructure.Services
                 EmailConfirmed = user.EmailConfirmed
             };
         }
+        public async Task<IEnumerable<UserInfoDto>> GetAllUsersAsync()
+        {
+            var users = await userManager.Users
+                .Include(u => u.Reviews)
+                .Include(u => u.Transactions)
+                .ToListAsync();
+
+            var userDtos = new List<UserInfoDto>();
+
+            foreach (var user in users)
+            {
+                var roles = (await userManager.GetRolesAsync(user)).ToList();
+                userDtos.Add(new UserInfoDto
+                {
+                    Id = user.Id,
+                    Email = user.Email!,
+                    Username = user.UserName!,
+                    PhotoUrl = user.PhotoUrl!,
+                    ReviewCount = user.Reviews.Count,
+                    TransactionCount = user.Transactions.Count,
+                    Role = roles,
+                    EmailConfirmed = user.EmailConfirmed
+                });
+            }
+
+            return userDtos;
+        }
     }
 }
