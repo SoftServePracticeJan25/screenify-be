@@ -32,6 +32,7 @@ namespace Infrastructure.Services
 
             var reviewWithUser = await _context.Reviews
             .Include(r => r.AppUser)
+            .Include(r => r.Movie)
             .FirstOrDefaultAsync(r => r.Id == review.Id);
 
             return _mapper.Map<ReviewReadDto>(reviewWithUser!);
@@ -39,10 +40,13 @@ namespace Infrastructure.Services
 
         public async Task<List<ReviewReadDto>> GetAllAsync(ReviewQueryObject query)
         {
-            var reviews = _context.Reviews.Include(r => r.AppUser).AsQueryable();
-    
+            var reviews = _context.Reviews
+                .Include(r => r.AppUser)
+                .Include(r => r.Movie) 
+                .AsQueryable();
+
             // Does filtration if movie id in query is not null
-            if(query.MovieId != null)
+            if (query.MovieId != null)
             {
                 reviews = reviews.Where(r => r.MovieId == query.MovieId);
             }
@@ -60,6 +64,7 @@ namespace Infrastructure.Services
         public async Task<ReviewReadDto?> GetByIdAsync(int id)
         {
             var review = await _context.Reviews
+            .Include(r => r.Movie)
             .Include(r => r.AppUser) 
             .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -69,6 +74,7 @@ namespace Infrastructure.Services
         public async Task<ReviewReadDto?> UpdateAsync(int id, ReviewUpdateDto reviewUpdateDto)
         {
             var existingReview = await _context.Reviews
+                .Include(r => r.Movie)
                 .Include(r => r.AppUser) 
                 .FirstOrDefaultAsync(x => x.Id == id);
 
@@ -88,7 +94,9 @@ namespace Infrastructure.Services
 
         public async Task<ReviewReadDto?> PatchAsync(int id, ReviewPatchDto reviewPatchDto)
         {
-            var existingReview = await _context.Reviews.FirstOrDefaultAsync(r => r.Id == id);
+            var existingReview = await _context.Reviews
+                .Include(r => r.Movie) 
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (existingReview == null)
             {
