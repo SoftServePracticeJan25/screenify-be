@@ -86,7 +86,7 @@ namespace Presentation.Controllers
             }
 
             var ticket = mapper.Map<Ticket>(ticketCreateDto);
-            await ticketService.AddAsync(ticket);
+            var ticketDto = await ticketService.AddAsync(ticket);
 
             // Sending email to user with needed files
             var user = await userManager.FindByIdAsync(userId);
@@ -110,8 +110,6 @@ namespace Presentation.Controllers
 
             //if (!user.EmailConfirmed) return BadRequest("Confirm email first");
 
-
-            var ticketDto = mapper.Map<TicketReadDto>(ticket);
             return CreatedAtAction(nameof(GetById), new { id = ticketDto.Id }, ticketDto);
         }
 

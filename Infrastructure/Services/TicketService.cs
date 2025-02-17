@@ -11,15 +11,28 @@ using System.Security.Claims;
 
 namespace Infrastructure.Services
 {
-    public class TicketService(MovieDbContext context, IMapper mapper,
-        UserManager<AppUser> userManager) : ITicketService
+    public class TicketService(MovieDbContext context, IMapper mapper) : ITicketService
     {
         public async Task<TicketReadDto> AddAsync(Ticket ticket)
         {
             await context.Tickets.AddAsync(ticket);
             await context.SaveChangesAsync();
-            return mapper.Map<TicketReadDto>(ticket);
+
+            var newTicket = await context.Tickets
+                .Include(t => t.Transaction)
+                    .ThenInclude(transaction => transaction!.AppUser)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s!.Movie)
+                .Include(t => t.Session)
+                    .ThenInclude(s => s!.Room)
+                .FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+            if (newTicket == null)
+                throw new Exception("Failed to retrieve the created ticket");
+
+            return mapper.Map<TicketReadDto>(newTicket);
         }
+
 
         public async Task<TicketReadDto?> DeleteAsync(int id)
         {
