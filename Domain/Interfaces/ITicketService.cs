@@ -13,5 +13,6 @@ namespace Domain.Interfaces
         Task<TicketReadDto?> UpdateAsync(int id, TicketUpdateDto ticketUpdateDto);
         Task <TicketReadDto?> DeleteAsync(int id);
         Task<bool> TicketExist(int id);
+        Task<bool> IsSeatAvailable(int? sessionId, int seatNum);
     }
 }
