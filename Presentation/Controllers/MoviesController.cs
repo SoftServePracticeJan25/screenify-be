@@ -16,12 +16,10 @@ namespace Presentation.Controllers
     public class MoviesController : ControllerBase
     {
         private readonly IMovieService _movieService;
-        private readonly MovieDbContext _context;
 
         public MoviesController(IMovieService movieService, MovieDbContext context)
         {
             _movieService = movieService;
-            _context = context;
         }
 
         [HttpGet]
@@ -101,20 +99,17 @@ namespace Presentation.Controllers
 
 
         [HttpGet("recommended")]
-        [Authorize(Roles =("User,Admin"))]
+        [Authorize(Roles = ("User,Admin"))]
         public async Task<IActionResult> GetRecommendedMoviesForUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
-                return Ok(new List<MovieReadDto>()); // empty []
+                return Ok(Enumerable.Empty<MovieReadDto>()); // empty []
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user == null)
-                return Ok(new List<MovieReadDto>()); // empty []
-
-            var recommendedMovies = await _movieService.GetRecommendedMoviesForUser(user);
+            var recommendedMovies = await _movieService.GetRecommendedMoviesForUser(userId);
             return Ok(recommendedMovies);
         }
+
 
 
         [HttpDelete("{id}")]

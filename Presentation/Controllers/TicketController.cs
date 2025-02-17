@@ -85,6 +85,13 @@ namespace Presentation.Controllers
                 return Forbid();
             }
 
+            bool isAvailable = await ticketService.IsSeatAvailable(ticketCreateDto.SessionId, ticketCreateDto.SeatNum);
+
+            if (!isAvailable)
+            {
+                return BadRequest(new { message = "This seat is already taken for the selected session." });
+            }
+
             var ticket = mapper.Map<Ticket>(ticketCreateDto);
             var ticketDto = await ticketService.AddAsync(ticket);
 

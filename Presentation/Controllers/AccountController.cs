@@ -2,6 +2,7 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using Infrastructure.Extentions;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -161,6 +162,15 @@ namespace Presentation.Controllers
 
             return Ok(userInfo);
         }
+
+        [HttpGet("get-users")]
+        [Authorize(Roles = "Admin")]
+        public async Task<JsonResult> GetUsers()
+        {
+            var users = await userInfoService.GetAllUsersAsync();
+            return new JsonResult(users);
+        }
+
 
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)

@@ -13,8 +13,27 @@ namespace Infrastructure.Services
 {
     public class TicketService(MovieDbContext context, IMapper mapper) : ITicketService
     {
+
+        public async Task<bool> IsSeatAvailable(int? sessionId, int seatNum)
+        {
+            if (!sessionId.HasValue)
+                return false; 
+
+            return !await context.Tickets.AnyAsync(t => t.SessionId == sessionId.Value && t.SeatNum == seatNum);
+        }
+
+
+
         public async Task<TicketReadDto> AddAsync(Ticket ticket)
         {
+
+            bool isAvailable = await IsSeatAvailable(ticket.SessionId, ticket.SeatNum);
+
+            if (!isAvailable)
+            {
+                throw new Exception("This seat is already taken for the selected session.");
+            }
+
             await context.Tickets.AddAsync(ticket);
             await context.SaveChangesAsync();
 
