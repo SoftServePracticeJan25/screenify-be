@@ -10,5 +10,6 @@ namespace Domain.Interfaces
     public interface IUserInfoService
     {
         Task<UserInfoDto> GetUserInfo(AppUser user);
+        Task<IEnumerable<UserInfoDto>> GetAllUsersAsync();
     }
 }
